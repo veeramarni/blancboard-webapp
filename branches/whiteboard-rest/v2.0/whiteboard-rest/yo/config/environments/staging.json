@@ -1,0 +1,4 @@
+{
+  "modulePrefix": "whiteboard-rest",
+  "baseURL": "http://blancboard:8080/"
+}
