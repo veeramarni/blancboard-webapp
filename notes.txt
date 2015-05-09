@@ -1,0 +1,29 @@
+Adding angular-ui-router
+--------
+bower install angular-ui-router --save
+
+add the following in test/karma.conf.js and index.html
+
+'bower_components/angular-ui-router/release/angular-ui-router.js',
+
+## Install additional components
+npm install grunt-contrib-less --save-dev
+npm install grunt-connect-proxy --save-dev
+
+Give permission to avoid permission issues
+-------
+sudo chown -R $(whoami) $HOME/.npm
+
+
+install config generator
+----
+http://newtriks.com/2013/11/29/environment-specific-configuration-in-angularjs-using-grunt/
+npm install generator-env-config --save-dev
+
+yo env-config
+yo env-config:angular config
+npm install grunt-replace --save-dev
+
+mock http
+-----
+
