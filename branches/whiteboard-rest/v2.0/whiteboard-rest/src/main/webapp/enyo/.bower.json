@@ -1,0 +1,15 @@
+{
+  "name": "enyo",
+  "homepage": "https://github.com/enyojs/enyo",
+  "version": "2.5.1",
+  "_release": "2.5.1",
+  "_resolution": {
+    "type": "version",
+    "tag": "2.5.1",
+    "commit": "feacab092468491783d1e9c99e9994a2b0648ebe"
+  },
+  "_source": "git://github.com/enyojs/enyo.git",
+  "_target": "2.5.1",
+  "_originalSource": "enyojs/enyo",
+  "_direct": true
+}

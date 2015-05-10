@@ -1,0 +1,34 @@
+//npm install yo grunt-cli bower
+npm install -g yo (g for globally install)
+npm install -g generator-webapp
+cd webapp
+--To install bootplate webapp just run yo
+yo 
+
+
+
+-development tool
+grunt server 
+-deploy tool
+grunt build 
+Bower
+---
+* Client side dependency and package management tool (By twitter)
+bower install 
+
+-- it takes the bower.json
+
+Add specific project version via bower.json
+
+Yeoman (YO) Generators
+-----------
+npm search yeoman-generator
+
+
+
+Blackbird
+--------
+Hide/Show F2
+Move	  Shift + F2
+clear     Alt + Shift + F2
+

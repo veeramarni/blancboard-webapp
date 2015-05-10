@@ -1,0 +1,6 @@
+{
+  "foo": "bar_dev",
+  "modulePrefix": "whiteboard-rest",
+  "baseURL": "/"
+
+}

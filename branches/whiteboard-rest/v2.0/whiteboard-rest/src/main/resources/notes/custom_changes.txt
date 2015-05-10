@@ -1,0 +1,9 @@
+Rapahel.js( "Raphaël 2.1.2" )
+==============
+fit ? "meet" : "xMinYMin"
+replace it with:
+
+fit ? "xMidYMid meet" : "xMinYMin"
+
+Bug info:
+https://github.com/DmitryBaranovskiy/raphael/issues/649
