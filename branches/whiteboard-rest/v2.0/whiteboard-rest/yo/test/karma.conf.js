@@ -37,6 +37,7 @@ module.exports = function(config) {
       'bower_components/angular-jwt/dist/angular-jwt.js',
       'bower_components/a0-angular-storage/dist/angular-storage.js',
       'bower_components/angular-mocks/angular-mocks.js',
+      'bower_components/enyo/enyo.js',
       // endbower
       'app/scripts/**/*.js',
       'test/mock/**/*.js',
