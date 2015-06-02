@@ -1,0 +1,161 @@
+.menu-button {
+    width: 60px;
+    height: 60px;
+    display: block;
+    border: none;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+.menu-button.active, .menu-button.pressed {
+    background-image: none;
+    border-top: none;
+    box-shadow: none;
+}
+
+.audio-button .menu-button {
+    background: url('../../assets/ic_audio.png') no-repeat;
+    background-size: 60px 180px;
+}
+
+.meetings-button .menu-button {
+    background: url('../../assets/ic_meetings.png') no-repeat;
+    background-size: 60px 180px;
+}
+
+.files-button .menu-button {
+    background: url('../../assets/ic_files.png') no-repeat;
+    background-size: 60px 180px;
+}
+
+.widgets-button .menu-button {
+    background: url('../../assets/ic_launcher.png') no-repeat;
+    background-size: 60px 180px;
+}
+
+.settings-button .menu-button {
+    background: url('../../assets/ic_settings.png') no-repeat;
+    background-size: 60px 180px;
+}
+
+.invite-button .menu-button {
+    background: url('../../assets/ic_invite.png') no-repeat;
+    background-size: 60px 180px;
+}
+
+.add-button .menu-button {
+    background: url('../../assets/ic_add.png') no-repeat;
+    background-size: 60px 180px;
+}
+
+.left-button .menu-button {
+    background: url('../../assets/ic_left.png') no-repeat;
+    background-size: 60px 180px;
+}
+
+.filemenu-button .menu-button {
+    background: url('../../assets/ic_menu.png') no-repeat;
+    background-size: 60px 180px;
+}
+
+.pages-button .menu-button {
+    background: url('../../assets/ic_pages.png') no-repeat;
+    background-size: 60px 180px;
+}
+
+.palette-button .menu-button {
+    background: url('../../assets/ic_palette.png') no-repeat;
+    background-size: 60px 180px;
+}
+
+.palette-button .menu-button {
+    background: url('../../assets/ic_palette.png') no-repeat;
+    background-size: 60px 180px;
+}
+
+.pen-button .menu-button {
+    background: url('../../assets/ic_pen.png') no-repeat;
+    background-size: 60px 180px;
+}
+
+.undo-button .menu-button {
+    background: url('../../assets/ic_undo.png') no-repeat;
+    background-size: 60px 180px;
+}
+
+.eraser-button .menu-button {
+    background: url('../../assets/ic_eraser.png') no-repeat;
+    background-size: 60px 180px;
+}
+
+.clear-button .menu-button {
+    background: url('../../assets/ic_clear.png') no-repeat;
+    background-size: 60px 180px;
+}
+
+.right-button .menu-button {
+    background: url('../../assets/ic_right.png') no-repeat;
+    background-size: 60px 180px;
+}
+
+.leave-button .menu-button {
+    background: url('../../assets/ic_leave.png') no-repeat;
+    background-size: 60px 180px;
+}
+
+.people-button .menu-button {
+    background: url('../../assets/ic_people.png') no-repeat;
+    background-size: 60px 180px;
+}
+
+.videoconf-button .menu-button {
+    background: url('../../assets/ic_videoconf.png') no-repeat;
+    background-size: 60px 180px;
+}
+
+.fullscreen-button .menu-button {
+    background: url('../../assets/ic_fullscreen.png') no-repeat;
+    background-size: 60px 180px;
+}
+
+.menu-button-enabled .menu-button {
+    background-size: 60px 180px;
+    background-position: 0 -60px;
+    cursor: pointer;
+}
+
+.menu-button-active .menu-button {
+    background-size: 60px 180px;
+    background-position: 0 -120px;
+    cursor: pointer;
+}
+
+.appSmall .menu-button {
+    width: 50px;
+    height: 50px;
+    background-size: 50px 150px;
+}
+
+@media screen and (orientation:portrait) {
+    .appSmall .menu-button {
+        margin: 0 auto;
+    }
+}
+.appSmall .menu-button-enabled .menu-button {
+    background-size: 50px 150px;
+    background-position: 0 -50px;
+    cursor: pointer;
+}
+
+.appSmall .menu-button-active .menu-button {
+    background-size: 50px 150px;
+    background-position: 0 -100px;
+    cursor: pointer;
+}
+@media screen and (orientation:landscape) {
+    .appSmall .menu-button-decorator {
+        position:absolute;
+        top:50%;
+        left:15px;
+        margin-top:-25px;
+    }
+}

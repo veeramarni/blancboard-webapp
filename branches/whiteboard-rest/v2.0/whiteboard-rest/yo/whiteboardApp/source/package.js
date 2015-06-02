@@ -1,0 +1,10 @@
+enyo.depends(
+	"$lib/../layout",
+	"$lib/../onyx",
+	"$lib/../../lib",
+	"$lib/../jquery/dist/jquery.js",
+	"style",
+	"data",
+	"views",
+	"app.js"
+)

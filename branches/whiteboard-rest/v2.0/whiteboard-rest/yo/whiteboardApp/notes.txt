@@ -1,0 +1,15 @@
+Enyo folder structure
+------
+http://enyojs.com/docs/latest/developer-guide/getting-started/planning-and-structuring-your-app.html
+Enyo test driven framework
+------
+http://byteplumbing.net/2013/11/test-driven-development-with-enyo-framework/
+
+
+
+Required
+=========
+enyo link should be available due to hardcoded referals in the enyo tools
+
+ln -s /Users/veeramarni/Documents/eclipse/workspace/whiteboard/v2.0/whiteboard-rest/yo/bower_components/enyo enyo
+ln -s /Users/veeramarni/Documents/eclipse/workspace/whiteboard/v2.0/whiteboard-rest/yo/lib lib

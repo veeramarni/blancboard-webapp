@@ -1,0 +1,13 @@
+enyo.depends(
+	"data.js",
+    "Analytics.js",
+    "CanvasInfo.js",
+    "OpenID.js",
+    "Session.js",
+    "persistence/IndexedDBManager.js",
+    "persistence/PersistenceManager.js",
+    "persistence/WebSQLManager.js",
+    "sync/SyncManager.js",
+    "util/data.js",
+    "util/xdm.js"
+);
