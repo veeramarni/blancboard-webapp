@@ -19,7 +19,10 @@
     "FlexSlider": "*",
     "angular-jwt": "~0.0.7",
     "a0-angular-storage": "~0.0.10",
-    "angular-mocks": "~1.3.15"
+    "angular-mocks": "~1.3.15",
+    "enyo": "~2.5.2",
+    "onyx": "enyojs/onyx#~2.5.2",
+    "layout": "enyojs/layout#~2.5.2"
   },
   "overrides": {
     "FlexSlider": {
