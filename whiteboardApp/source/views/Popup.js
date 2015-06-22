@@ -2,8 +2,8 @@ enyo.kind({
     name: "blanc.Popup",
     kind: "enyo.Popup",
     published: {
-        scrimWhenModal: !0,
-        scrim: !1,
+        scrimWhenModal: true,
+        scrim: false,
         scrimClassName: "",
         defaultZ: 120
     },

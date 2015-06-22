@@ -2,9 +2,10 @@ enyo.kind({
 	name: "blanc.Content",
 	classes: "content",
 	handlers: {
-	//	onRestoreView: "restoreView",
-	//	onDisplayPage: "displayPage",
-	//	onDisplayWidget: "displayWidget",
+		//	onRestoreView: "restoreView",
+		onDisplayPage: "displayPage",
+		onFileOpen: "showFile",
+		//	onDisplayWidget: "displayWidget",
 		onClearContent: "clearView"
 	},
 	components: [{
@@ -14,10 +15,30 @@ enyo.kind({
 		draggable: false,
 		components: [{}]
 	}],
-	getPanels: function(){
+	// ...........................
+	// PUBLIC METHODS
+	showFile: function(docid, pageno, n) {
+		var pn = this.getPanels();
+		if (pn && pn.length > 0) {
+			var o = pn[0];
+			if (o.getName() === "fileView" && o.docid === docid && !n) {
+				return o.showPage(pageno);
+			}
+			o instanceof blanc.FileView && o.saveCurrentPageNo(), o.destroy();
+		}
+		this.addPanel({
+			name: "fileView",
+			kind: "blanc.FileView",
+			docid: docid,
+			pageno: pageno
+		})
+	},
+
+	// Following code for panels
+	getPanels: function() {
 		return this.$.panels.getPanels();
 	},
-	addPanel: function(e){
+	addPanel: function(e) {
 		var comp = this.$.panels.createComponent(e, {
 			owner: this
 		});
@@ -25,23 +46,23 @@ enyo.kind({
 		this.reflow();
 		return comp;
 	},
-	clearView: function(){
+	clearView: function() {
 		var panels = this.getPanels();
-		if(panels && panels.length > 0){
+		if (panels && panels.length > 0) {
 			var panel = panels[0];
 			panel.destroy();
 		}
 	},
-	showView: function(panelName, kind, pn){
+	showView: function(panelName, kind, pn) {
 		var panel = null,
 			panels = this.getPanels();
-		if(panels && panels.length > 0){
-			if(panel = panels[0], panel.getName() == panelName){
+		if (panels && panels.length > 0) {
+			if (panel = panels[0], panel.getName() == panelName) {
 				return panel;
 			}
 			panel.distroy();
 			panel = null;
 		}
-		return panel || (pn || (pn={}), pn.name=panelName, pn.kind=kind,panel = this.addPanel(pn)),panel;
+		return panel || (pn || (pn = {}), pn.name = panelName, pn.kind = kind, panel = this.addPanel(pn)), panel;
 	}
 })
