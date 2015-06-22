@@ -36,6 +36,9 @@ enyo.kind({
     	isTablet: function(){
     		return this.isMobile() && "LARGE" === this.getDeviceSize();
     	},
+        isGuest: function(){
+            return true;
+        },
     	getDevice: function(){
     		return new bjse.api.devices.Device({
     			id: blanc.Session.getDeviceId(),

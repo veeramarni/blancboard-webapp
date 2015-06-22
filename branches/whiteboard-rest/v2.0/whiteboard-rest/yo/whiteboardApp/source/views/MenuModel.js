@@ -232,5 +232,12 @@ enyo.kind({
     },
 	undoStateChanged: function(){
 		
-	}
+	},
+    pageChanged: function(sender, event){
+        this.enableDrawing();
+        this.enableNavigation();
+        this.enableContentOperations();
+        this.buttons.leftArrow.state = event.pageno > 1 ? ButtonState.ENABLED : ButtonState.DISABLED;
+        this.buttons.rightArrow.state = event.pageno < event.npages ? ButtonState.ENABLED : ButtonState.DISABLED;
+    }
 })

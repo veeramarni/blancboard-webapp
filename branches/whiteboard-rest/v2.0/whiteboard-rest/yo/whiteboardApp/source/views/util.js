@@ -24,12 +24,12 @@ enyo.kind({
             var t, n = e.lastIndexOf(".");
             return t = n > 0 && e.length - 1 > n ? e.substring(n + 1) : ""
         },
-        scaleRect: function(e, t, n, i) {
-            var o = e / t > n / i ? t / i : e / n,
-                s = n * o,
-                a = i * o,
-                r = (t - a) / 2,
-                l = (e - s) / 2;
+        scaleRect: function(clientWidth, clientHeight, targetWidth, targetHeight) {
+            var o = clientWidth / clientHeight > targetWidth / targetHeight ? clientHeight / targetHeight : clientWidth / targetWidth,
+                s = targetWidth * o,
+                a = targetHeight * o,
+                r = (clientHeight - a) / 2,
+                l = (clientWidth - s) / 2;
             return {
                 top: r,
                 left: l,

@@ -1,12 +1,23 @@
 enyo.kind({
 	name: "blanc.Button",
 	kind: "enyo.Button",
-	handler: {
+	handlers: {
 		ontap: "clicked"
 	},
+	// ...........................
+	// PUBLIC PROPERTIES
+
+	// ...........................
+	// PROTECTED PROPERTIES
+	savedContent: null,
+	// ...........................
+	// COMPUTED PROPERTIES
+
+	// ...........................
+	// PUBLIC METHODS
 	clicked: function(){
 		this.savedContent = this.getContent();
-		this.setContent(this.loading ? this.loading : L("Please wait ..."));
+		this.setContent(this.loading ? this.loading : $L("Please wait ..."));
 		this.setAttribute("disabled", "disabled");
 	},
 	reset: function(){
@@ -14,5 +25,12 @@ enyo.kind({
 		this.blur();
 		this.setAttribute("disabled", null);
 	}
+	// ...........................
+	// PROTECTED METHODS
+
+	// ...........................
+	// OBSERVERS
+
+
 
 })
