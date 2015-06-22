@@ -38,6 +38,10 @@ module.exports = function(config) {
       'bower_components/a0-angular-storage/dist/angular-storage.js',
       'bower_components/angular-mocks/angular-mocks.js',
       'bower_components/enyo/enyo.js',
+      'bower_components/raphael/raphael.js',
+      'bower_components/raphael.json/raphael.json.js',
+      'bower_components/raphael.export/raphael.export.js',
+      'bower_components/raphael.free_transform/raphael.free_transform.js',
       // endbower
       'app/scripts/**/*.js',
       'test/mock/**/*.js',
