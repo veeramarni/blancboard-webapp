@@ -11,6 +11,8 @@ bjse.api.board.Page = function(props){
 	this.pageNo = 0;
 	this.width = 0;
 	this.height = 0;
+	this.contentWidth = 0;
+	this.contentHeight = 0;
 	this.contentUrl = "";
 	bjse.util.mixin(this,props);
 

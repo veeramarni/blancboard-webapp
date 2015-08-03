@@ -17,12 +17,12 @@ bjse.api.devices.Device = function(settings){
 bjse.api.devices.DeviceManager = function(ses){
 	this.session = ses;
 };
-bjse.api.devices.DeviceManager.prototype.registerDevice = function(data, success, error){
+bjse.api.devices.DeviceManager.prototype.registerDevice = function(device, success, error){
 	var url = bjse.util.format("{$apiurl}/devices",{
 		apiurl: this.session.runtime.serverUrl
 	});
-	this.session.getHttpClient().post(url, data, function(res){
-		var dev = new bjse.api.devices.Device(JSON.parse(res));
+	this.session.getHttpClient().postAuth(url, device, function(res){
+		var dev = new bjse.api.devices.Device(res);
 		success(dev);
 	}, error)
 };
@@ -31,13 +31,13 @@ bjse.api.devices.DeviceManager.prototype.deregisterDevice = function(deviceid, s
 		apiurl: this.session.runtime.serverUrl,
 		deviceid: deviceid
 	});
-	this.session.getHttpClient().del(url, success, error);
+	this.session.getHttpClient().delAuth(url, success, error);
 };
 bjse.api.devices.DeviceManager.prototype.getDevices = function(success, error){
 	var url = bjse.util.format("{$apiurl}/devices", {
 		apiurl: this.session.runtime.serverUrl
 	});
-	this.session.getHttpClient().get(url, function(res){
+	this.session.getHttpClient().getAuth(url, function(res){
 		var d = JSON.parse(res),
 			devs = [];
 		if(bjse.util.isArray(d.device)){

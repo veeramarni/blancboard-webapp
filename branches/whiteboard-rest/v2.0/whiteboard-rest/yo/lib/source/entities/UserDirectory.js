@@ -7,13 +7,12 @@ var AccountType = {
 bjse.api.users.AccountType = AccountType;
 bjse.api.users.User = function(user){
 	this.id = "";
-	this.email = "";
-	this.username = "";
+	this.emailAddress = "";
+	this.name = "";
 	this.firstName = "";
 	this.lastName = "";
 	this.displayName = "";
 	this.avatarUrl = "";
-	this.password = "";
 	this.about = "";
 	this.accountType = AccountType.FREE;
 	this.accountid = "";
@@ -28,8 +27,8 @@ bjse.api.users.UserDirectory.prototype.getUser = function(userid, success, error
 		apiurl: this.session.runtime.serverUrl,
 		userid: userid
 	});
-	this.session.getHttpClient().get(n, {}, function(response){
-		var user = new bjse.api.users.User(JSON.parse(response));
+	this.session.getHttpClient().getAuth(url, '', function(response){
+		var user = new bjse.api.users.User(response);
 		success(user);
 	}, error);
 };
@@ -38,12 +37,12 @@ bjse.api.users.UserDirectory.prototype.updateUser = function(userid, updatedUser
 		apiurl: this.session.runtime.serverUrl,
 		userid: userid
 		}),
-		s = this;
-	this.session.getHttpClient().post(url,updatedUser, function(response){
-		var user = new bjse.api.users.User(JSON.parse(response));
-		 if(s.session.user.id === user.id){
-		 	s.session.user = user;
-		 	s.session.username = user.email;
+		that = this;
+	this.session.getHttpClient().postAuth(url,updatedUser, function(response){
+		var user = new bjse.api.users.User(response);
+		 if(that.session.user.id === user.id){
+		 	that.session.user = user;
+		 	that.session.username = user.email;
 		 }
 		 success(user);
 	}, error);
@@ -52,9 +51,8 @@ bjse.api.users.UserDirectory.prototype.getUsers = function(success, error){
 	var url = bjse.util.format("{$apiurl}/users", {
 		apiurl: this.session.runtime.serverUrl
 	});
-	this.session.getHttpClient().get(url, function(response){
-		var data = JSON.parse(response),
-			users = [];
+	this.session.getHttpClient().getAuth(url, function(data){
+		var users = [];
 		if(bjse.util.isArray(data.user)){
 			for(var i = 0; i < data.user.length; i++){
 				users.push(new bjse.api.users.User(data.user[i]));

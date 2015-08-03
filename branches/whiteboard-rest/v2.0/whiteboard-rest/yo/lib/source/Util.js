@@ -1,33 +1,32 @@
 bjse.util = {
-	empty: {},
- 	mixin: function(t, e, i) {
+    empty: {},
+    mixin: function(t, e, i) {
         var n, o, s, a, r, h;
-        if (bjse.util.isArray(t) ? (n = {}, o = t, e && bjse.util.isObject(e) && (s = e)) : (n = t || {}, o = e, s = i), 
-        	bjse.util.isObject(s) || (s = {}), !0 === i && (s.ignore = !0, s.exists = !0), bjse.util.isArray(o))
-            for (a = 0; h = o[a]; ++a) 
-            	bjse.util.mixin(n, h, s);
+        if (bjse.util.isArray(t) ? (n = {}, o = t, e && bjse.util.isObject(e) && (s = e)) : (n = t || {}, o = e, s = i),
+            bjse.util.isObject(s) || (s = {}), !0 === i && (s.ignore = !0, s.exists = !0), bjse.util.isArray(o))
+            for (a = 0; h = o[a]; ++a)
+                bjse.util.mixin(n, h, s);
         else
-            for (r in o) 
-            	h = o[r], 
-                bjse.util.empty[r] !== h && 
-            	(s.exists && !h || s.ignore && n[r] 
-            	|| (s.filter && bjse.util.isFunction(s.filter) ? !s.filter(r, h, o, n, s) : 0) || (n[r] = h));
+            for (r in o)
+                h = o[r],
+                bjse.util.empty[r] !== h &&
+                (s.exists && !h || s.ignore && n[r] || (s.filter && bjse.util.isFunction(s.filter) ? !s.filter(r, h, o, n, s) : 0) || (n[r] = h));
         return n
     },
-	isArray: Array.isArray || function(t){
-		return "[object Array]" === this.toString.call(t);
-	},
-	isFunction: function(t){
-		return "[object Function]" === this.toString.call(t);
-	},
-	isString: function(t){
-		return "[object String]" === this.toString.call(t);
-	},
+    isArray: Array.isArray || function(t) {
+        return "[object Array]" === this.toString.call(t);
+    },
+    isFunction: function(t) {
+        return "[object Function]" === this.toString.call(t);
+    },
+    isString: function(t) {
+        return "[object String]" === this.toString.call(t);
+    },
     isObject: Object.isObject || function(t) {
         return null !== t && "[object Object]" === this.toString.call(t)
     },
-	toString: Object.prototype.toString,
-	format: function(t, e, i) {
+    toString: Object.prototype.toString,
+    format: function(t, e, i) {
         var n, o, s = t,
             a = i || this.format_pattern,
             r = function(t, i) {
@@ -49,7 +48,12 @@ bjse.util = {
         return o
     },
     format_pattern: /\{\$([^{}]*)\}/g,
-	/**
+    getTimestamp: function(){
+        // set timestamp
+        var curDate = new Date();
+        return curDate.getTime() + curDate.getTimezoneOffset() * 60000;
+    },
+    /**
      * Checks whether an JavaScript object is null or empty.
      * 
      * @function
@@ -57,43 +61,51 @@ bjse.util = {
      *            any JavaScript object
      */
     isBlankObject: function(obj) {
-    	if (obj == null) {
-    		return true;
-    	}    
+        if (obj == null) {
+            return true;
+        }
 
-    	for ( var prop in obj) {
-    		if (obj.hasOwnProperty(prop)) {
-    			return false;
-    		}
-    	}
-    	return true;
+        for (var prop in obj) {
+            if (obj.hasOwnProperty(prop)) {
+                return false;
+            }
+        }
+        return true;
     },
+
     /**
      * Escapes blackslash and quotes
      * @param myVal
      * @returns
      */
-    escapeBackslashQuotes: function(myVal)
-    {
-    	myVal = myVal.replace(/\\/g, '\\\\'); // escape backslashes
-    	myVal = myVal.replace(/,/g, '\\,'); // escape backslashes
-    	myVal = myVal.replace(/"/g, '\\"'); // escape quotes
-    	return myVal;
+    escapeBackslashQuotes: function(myVal) {
+        myVal = myVal.replace(/\\/g, '\\\\'); // escape backslashes
+        myVal = myVal.replace(/,/g, '\\,'); // escape backslashes
+        myVal = myVal.replace(/"/g, '\\"'); // escape quotes
+        return myVal;
     },
-	/** 
-	 * Similar to $.grep but returns an object on first truthy.
-	 */
-	or : function (arr, callback, context) {
-	    var el;
-	    for (var i = 0, l = arr.length; i < l; i++) {
-	        el = arr[i];
-	        if (callback.call(context, el, i, arr)) {
-	            return el;
-	        }
-	    }
-	    return null;//to return null and not undefined
-	}
-
-
+    /** 
+     * Similar to $.grep but returns an object on first truthy.
+     */
+    or: function(arr, callback, context) {
+        var el;
+        for (var i = 0, l = arr.length; i < l; i++) {
+            el = arr[i];
+            if (callback.call(context, el, i, arr)) {
+                return el;
+            }
+        }
+        return null; //to return null and not undefined
+    },
+    /**
+     *
+     *
+     */
+    extend: function() {
+        for (var i = 1; i < arguments.length; i++)
+            for (var key in arguments[i])
+                if (arguments[i].hasOwnProperty(key))
+                    arguments[0][key] = arguments[i][key];
+        return arguments[0];
+    }
 }
-
