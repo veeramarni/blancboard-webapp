@@ -1,6 +1,6 @@
 enyo.kind({
 	name: "blanc.NewWhiteboardPanel",
-	kind: "enyo.Control",
+	kind: "FittableRows",
 	events: {
 		onFileCreated: "",
 		onFileOpen: "",
@@ -65,6 +65,7 @@ enyo.kind({
 		}]
 
 	}],
+	init: function(){},
 	reset: function() {
 		this.$.formGroup.addRemoveClass("has-success", false);
 		this.$.formGroup.addRemoveClass("has-error", false);
@@ -83,9 +84,9 @@ enyo.kind({
 		var that = this;
 		blanc.Session.getPersistenceManager().createWhiteboard(name, function(e) {
 			that.$.submit.reset();
-			// that.doFileCreated({
-			// 	docid: e.id
-			// });
+			that.doFileCreated({
+				docid: e.id
+			});
 			that.doFileOpen({
 				docid: e.id
 			});
@@ -98,7 +99,7 @@ enyo.kind({
 	onEnter: function(e, t) {
 		if (t.keyCode === 13) {
 			this.$.submit.clicked();
-			this.$.submitBtnClicked();
+			this.submitBtnClicked();
 			return true;
 		}
 		return false;

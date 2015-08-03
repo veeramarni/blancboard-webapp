@@ -5,15 +5,16 @@ enyo.kind({
 		var dt = (new Date).getTime(),
 			that = this,
 			count = 0,
-			board = {
-				id: bjse.util.randomUUID(),
-				title: name,
-				type: "File",
-				dateCreated: dt,
-				ownerid: blanc.Session.getUserId(),
-				shared: false,
-			};
-		this.storeDocument(board, function(doc) {
+			newDoc = new bjse.api.board.Document;
+		newDoc.id = bjse.util.randomUUID();
+		newDoc.title = name;
+		newDoc.type = "File";
+		newDoc.ownerid = blanc.Session.getUserId();
+		newDoc.shared = false;
+		newDoc.cached = true;
+		newDoc.timeCreated = dt;
+		newDoc.contentType = "application/blanc-note";
+		this.storeDocument(newDoc, function(doc) {
 			for (var i = 0; i < 3; i++) {
 				that.createEmptyPage(doc.id, i + 1, function() {
 					3 === ++count && success(doc);
@@ -32,8 +33,8 @@ enyo.kind({
 		page.pageNo = pageno;
 		page.height = 768;
 		page.width = 1024;
-		id == 1 && (page.thumbid = "thumb_"+id);
-		this.storePage(page, function(e){
+		id == 1 && (page.thumbid = "thumb_" + id);
+		this.storePage(page, function(e) {
 			success(e);
 		}, error);
 

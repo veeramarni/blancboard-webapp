@@ -7,8 +7,8 @@
 enyo.kind({
 	name: "blanc.Application",
 	kind: "enyo.Application",
-	view: "blanc.MainView"
-	//view: "blanc.Test"
+	view: "blanc.MainView"	
+	//view: "blanc.SigninForms"
 });
 
 enyo.ready(function() {

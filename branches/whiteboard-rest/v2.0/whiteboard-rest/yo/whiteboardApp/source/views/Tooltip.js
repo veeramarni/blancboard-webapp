@@ -1,6 +1,6 @@
 enyo.kind({
 	name: "blanc.Tooltip",
-	kind: "blanc.Popup",
+	kind: "onyx.Popup",
 	classes: "mm-tooltip below left-arrow",
 	autoDismiss: false,
 	showDelay: 500,

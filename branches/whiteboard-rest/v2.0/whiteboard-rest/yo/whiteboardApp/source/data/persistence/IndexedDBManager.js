@@ -16,7 +16,7 @@ enyo.kind({
 		}());
 		try {
 			var that = this,
-				db = window.indexedDB.open("blancdb", 1);
+				db = window.indexedDB.open("blancdb", 4);
 			db.onerror = function(err) {
 				console.log(err.target.errorCode);
 				error(err.target.error);
@@ -27,8 +27,8 @@ enyo.kind({
 			};
 			db.onupgradeneeded = function(e) {
 				var t = e.target.result;
-				if (e.oldVersion < 1) {
-					console.log("Creating blancdb Database");
+				if (e.oldVersion < 4) {
+					logInfo("Creating blancdb Database");
 					t.createObjectStore("users", {
 						keyPath: "id"
 					});
@@ -44,7 +44,21 @@ enyo.kind({
 					pagesObjStore.createIndex("assetidIndex", "assetid", {
 						unique: false
 					});
-
+					var elementsObjStore = t.createObjectStore("elements", {
+						keyPath: "id"
+					});
+					elementsObjStore.createIndex("pageIndex", "pageid", {
+						unique: false
+					});
+					elementsObjStore.createIndex("assetidIndex", "assetid", {
+						unique: false
+					});
+					var blobsObjStore = t.createObjectStore("blobs", {
+						keyPath: "id"
+					});
+					blobsObjStore.createIndex("assetidIndex", "assetid", {
+						unique: false
+					})
 				}
 			}
 		} catch (e) {
@@ -55,13 +69,15 @@ enyo.kind({
 		var trans = this.database.transaction(["users"], "readwrite"),
 			objstore = trans.objectStore("users"),
 			req = objstore.put(user);
-		req.onsuccess = function() {};
-		req.onerror = function() {
-			error(req.error);
-		};
-		req.oncomplete = function() {
+		req.onsuccess = function() {
 			success(user);
 		};
+		req.onerror = function(event) {
+			error(event.target.error);
+		};
+		// req.oncomplete = function() {
+		// 	success(user);
+		// };
 	},
 	updateUser: function(user, success, error) {
 		this.storeUser(user, success, error);
@@ -74,25 +90,27 @@ enyo.kind({
 		req.onsuccess = function(res) {
 			if (res.target.result) {
 				var usr = new bjse.api.users.User(res.target.result);
-				success(usr);
+				success && success(usr);
 			} else {
-				error("not found");
+				error && error("not found");
 			}
 		};
-		req.onerror = function() {
-			error(req.error)
+		req.onerror = function(event) {
+			error(event.target.error)
 		};
 	},
 	deleteUser: function(userid, success, error) {
 		var trans = this.database.transaction(["users"], "readwrite"),
 			objstore = trans.objectStore("users"),
 			req = objstore["delete"](userid);
-		req.onsuccess = function() {};
-		req.onerror = function() {
-			error && error(req.error);
+		req.onsuccess = function() {
+			success && success(userid);
+		};
+		req.onerror = function(event) {
+			error && error(event.target.error);
 		};
 		req.oncomplete = function() {
-			success && success(userid);
+
 		};
 	},
 	// BOARD DATA
@@ -103,9 +121,32 @@ enyo.kind({
 		req.onsuccess = function() {
 			success && success(doc);
 		};
-		req.onerror = function() {
+		req.onerror = function(event) {
 			error && error(doc);
 		}
+	},
+	deleteAllDocuments: function(success, error) {
+		var trans = this.database.transaction(["documents", "pages", "elements", "blobs"], "readwrite");
+		trans.objectStore("documents").clear();
+		trans.objectStore("pages").clear();
+		trans.objectStore("elements").clear();
+		trans.objectStore("blobs").clear();
+		trans.oncomplete = function(){
+			success && success();
+		};
+		trans.onerror = function(){
+			error && error();
+		};
+		trans.onabort = function(){
+			error && error();
+		}
+	},
+	updateCurrentPageNo: function(docid, pageno, success, error) {
+		var that = this;
+		this.getDocumentById(docid, function(doc) {
+			doc.currentPageNo = pageno;
+			that.storeDocument(doc);
+		})
 	},
 	storePage: function(page, success, error) {
 		var trans = this.database.transaction(["pages"], "readwrite"),
@@ -114,25 +155,95 @@ enyo.kind({
 		req.onsuccess = function() {
 			success && success(page);
 		};
-		req.onerror = function() {
-			error(req.error);
+		req.onerror = function(event) {
+			error && error(event.target.error);
 		};
 	},
-	getDocumentById: function(docid, success, error) {
-		var trans = this.database.transaction(["documents"], "readwrite"),
-			objstore = trans.objectStore("documents"),
-			req = objstore.get(docid),
-			that = this;
-		req.onsuccess = function(res) {
-			if (res.target.result) {
-				success(that.record2doc(res.target.result));
-			} else {
-				error("document id :" + docid + " not found");
+	deletePage: function(pageid, success, error) {
+		this.deletePageElements(pageid);
+		var trans = this.database.transaction(["pages", "blobs"], "readwrite"),
+			obstorePages = trans.objectStore("pages"),
+			req = objstore.get(pageid),
+			thumbid = null,
+			previewid = null;
+		req.onsuccess = function(event) {
+			var res = event.target.result;
+			if (res) {
+				thumbid = res.thumbid;
+				previewid = res.previewid;
+				req["delete"](res.id);
 			}
-		};
-		req.onerror = function() {
-			error(req.error);
+			success();
 		}
+		req.onerror = function() {
+			error && error();
+		}
+		thumbid && that.deleteBlob(thumbid);
+		previewid && this.deleteBlob(previewid);
+	},
+	getDocuments: function(success, error) {
+		var trans = this.database.transaction(["documents"], "readonly"),
+			objstore = trans.objectStore("documents"),
+			cur = objstore.openCursor(),
+			that = this,
+			result = [];
+		cur.onsuccess = function() {
+			var res = cur.result;
+			if (res) {
+				var doc = that.record2doc(res.value);
+				result.push(doc);
+				res["continue"]();
+			} else {
+				success && success(result);
+			}
+		}
+		cur.onerror = function(event) {
+			error(cur.error);
+		}
+
+	},
+	getDocumentById: function(docid, success, error) {
+		var trans = this.database.transaction(["documents"], "readonly"),
+			objstore = trans.objectStore("documents"),
+			res = objstore.get(docid),
+			that = this;
+		res.onsuccess = function(event) {
+			var data = event.target.result;
+			data ? success(that.record2doc(data)) : (error && error("docid: " + docid + " not found."));
+		}
+		res.onerror = function(event) {
+			error && error(res.error);
+		}
+	},
+	deleteDocumentCascade: function(docid, trans) {
+		var pagesobjstore = trans.objectStore("pages")
+		pagescur = pagesobjstore.index("assetidIndex").openCursor(IDBKeyRange.only(docid));
+		pagescur.onsuccess = function() {
+			var res = pagescur.result;
+			res && (pagesobjstore["delete"](res.value.id), res["continue"]());
+		};
+		// var elementsobjstore = trans.objectStore("elements"),
+		// 	elementscur = elementsobjstore.index("asssetidIndex").openCursor(IDBKeyRange.only(docid));
+		// elementscur.onsuccess = function(){
+		// 	var res = elementscur.result;
+		// 	res && (elementsobjstore["delete"](res.value.id), res["continue"]());
+		// }
+		var blobsobjstore = trans.objectStore("blobs"),
+			blobscur = blobsobjstore.index("assetidIndex").openCursor(IDBKeyRange.only(docid));
+		blobscur.onsuccess = function() {
+			var res = blobscur.result;
+			res && (blobsobjstore["delete"](res.value.id), res["continue"]());
+		}
+
+	},
+	deleteDocument: function(docid, success, error) {
+		var trans = this.database.transaction(["documents", "pages", "elements", "blobs"], "readwrite"),
+			objstore = trans.objectStore("documents");
+		objstore["delete"](docid);
+		this.deleteDocumentCascade(docid, trans);
+		trans.oncomplete = success;
+		trans.onabort = error;
+		trans.onerror = error;
 	},
 	getPagesForDocument: function(docId, success, error) {
 		var trans = this.database.transaction(["pages"], "readwrite"),
@@ -153,16 +264,13 @@ enyo.kind({
 				});
 				success(pages);
 			}
-			
 		};
-		cur.onerror = function() {
+		cur.onerror = function(event) {
 			error(cur.error);
 		}
 	},
 	record2doc: function(rec) {
-		var doc = {
-			id: rec.id
-		};
+		var doc = new bjse.api.board.Document(rec);
 		for (var i in rec) {
 			rec.hasOwnProperty(i) && (doc[i] = rec[i]);
 		}
@@ -183,5 +291,158 @@ enyo.kind({
 	},
 	record2page: function(rec) {
 		return new bjse.api.board.Page(rec);
+	},
+	/**
+	 *	Store path
+	 */
+	storeElement: function(element, pageid, success, error) {
+		var trans = this.database.transaction(["elements"], "readwrite"),
+			objstore = trans.objectStore("elements"),
+			req = objstore.put(this.element2record(element, pageid));
+		req.onsuccess = function() {
+			logDebug("storage: stored element id: " + element.properties.uuid);
+			success && success(element);
+		}
+		req.onerror = function(event) {
+			error && error(event.target.error);
+		}
+	},
+	deletePageElements: function(pageid, success, error) {
+		var trans = this.database.transaction("elements", "readwrite"),
+			objstore = trans.objectStore("elements"),
+			req = objstore.index("pageIndex").openCursor(IDBKeyRange.only(pageid));
+		req.onsuccess = function() {
+			var res = req.result;
+			res && (objstore["delete"](res.value.id), res["continue"]());
+			success();
+		}
+		req.onerror = function() {
+			error();
+		}
+	},
+	deleteElement: function(elementid, success, error) {
+		var trans = this.database.transaction("elements", "readwrite"),
+			objstore = trans.objectStore("elements"),
+			req = objstore["delete"](elementid);
+		req.onsuccess = function() {
+			logDebug("storage: deleted element id: " + elementid);
+			success && success(elementid);
+		}
+		req.oncomplete = function() {
+
+		}
+		req.onerror = function(event) {
+			error && error(event.target.error);
+		}
+	},
+	storeElements: function(elemArray, pageid, success, error) {
+		var len = elemArray.length,
+			that = this,
+			count = 0;
+		this.deletePageElements(pageid, function() {
+			for (var i = 0; i < len; i++) {
+				that.storeElement(elemArray[i], pageid, function(elemArray) {
+					len == ++count && success && success();
+				}, function() {
+					error && error();
+				});
+			}
+		}, function() {
+			if (that.elemArray.length == 0) {
+				success && success();
+			}
+		}, function() {
+			if (that.elemArray.length == 0) {
+				error && error();
+			}
+		});
+	},
+	getElementsByPageId: function(pageid, success, error) {
+		var trans = this.database.transaction("elements", "readonly"),
+			objstore = trans.objectStore("elements"),
+			cur = objstore.openCursor(),
+			that = this,
+			result = [];
+		cur.onsuccess = function() {
+			var res = cur.result;
+			if (res) {
+				if (res.value.pageid == pageid) {
+					result.push(that.record2element(res.value));
+				}
+				res["continue"]();
+			} else {
+				success(result);
+			}
+		}
+		cur.onerror = function(event) {
+			error && error();
+		}
+	},
+	element2record: function(element, pageid) {
+		var elrec = {
+				id: element.properties.uuid,
+				pageid: pageid,
+				type: element.type
+			},
+			props = element.properties;
+		for (var i in props) {
+			props.hasOwnProperty(i) && (elrec[i] = props[i]);
+		}
+		return elrec;
+	},
+	record2element: function(rec) {
+		var element = {
+			type: rec.type,
+			properties: {}
+		}
+		for (var i in rec) {
+			if (rec.hasOwnProperty(i) && (i != "type" && i != "pageid" && i != "id"))
+				element.properties[i] = rec[i];
+		}
+		return element;
+	},
+	storeBlob: function(blobid, data, docid, success, error) {
+		var trans = this.database.transaction(["blobs"], "readwrite"),
+			objstore = trans.objectStore("blobs"),
+			req = objstore.put({
+				id: blobid,
+				assetid: docid,
+				data: data
+			});
+		req.onsuccess = function() {
+			success && success();
+		}
+		req.onerror = function(event) {
+			error && error(event.target.error);
+		}
+		req.oncomplete = function() {
+
+		}
+	},
+	getBlob: function(blobid, success, error) {
+		var trans = this.database.transaction(["blobs"], "readonly"),
+			objstore = trans.objectStore("blobs"),
+			req = objstore.get(blobid);
+		req.onsuccess = function(event) {
+			var res = event.target.result;
+			res ? success(res.value.data) : (error && error({
+				code: 404,
+				message: "not found"
+			}))
+		}
+		req.onerror = function(event) {
+			error(event.target.error);
+		}
+	},
+	deleteBlob: function(blobid, success, error) {
+		var trans = this.database.transaction(["blobs"], "readonly"),
+			objstore = trans.objectStore("blobs"),
+			req = objstore["delete"](blobid);
+		req.onsuccess = function() {
+			success && success();
+		}
+		req.onerror = function(event) {
+			error && error(event.target.error);
+		}
 	}
 })

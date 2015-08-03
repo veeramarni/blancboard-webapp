@@ -3,10 +3,12 @@ enyo.kind({
 	classes: "appLarge",
 	kind: "blanc.AppView",
 	// ...........................
-	// PUBLIC PROPERTIES
+	// Inhertied PROPERTIES
+	/*
 	orientation: null,
 	menuModel: null,
 	meetingModel: null,
+	*/
 
 	components: [{
 		name: "app",

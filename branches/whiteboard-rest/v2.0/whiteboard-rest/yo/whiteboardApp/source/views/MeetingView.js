@@ -1,0 +1,71 @@
+enyo.kind({
+	name: "blanc.MeetingView",
+	kind: "FittedRows",
+	fit: true,
+	handlers: {
+		onUndoClicked: "undo",
+		onClearClicked: "clear",
+		onBoardAction: "boardAction"
+	},
+	events: {
+		onPageDisplayed: ""
+	},
+	components: [{
+		layoutKind: "FittableColumnsLayout",
+		classes: "file-header",
+		components: [{
+			classes: "file-title",
+			name: "title",
+			content: ""
+		}, {}]
+	}, {
+		fit: true,
+		components: [{
+			kind: "Panels",
+			style: "width:100%; height:100%;",
+			draggable: false,
+			classes: "file-content",
+			name: "panels",
+			animate: false,
+			component: [{
+				kind: "blanc.MeetingPageView"
+			}, {
+				kind: "blanc.MeetingPageView"
+			}]
+		}]
+	}],
+	rendered: function(){
+		this.inherited(arguments);
+		this.page && this.displayPage(this.page);
+	},
+	pageView: function(){
+		return this.$.panels.getActive();
+	},
+	displayPage: function(pg){
+		var curpn, pn = this.$.panels.getActive();
+		if(pn.getPage() == null || pn.getPage().id != pg.id){
+			pn.destroyComponents();
+			var ind = this.$.panels.getIndex(),
+				o = (ind + 1) % 2;
+			curpn = this.$.panels.getPanels()[o];
+			this.$.title.setContent(pg.title);
+			this.$.panels.setIndex(o);
+			curpn.displayPage(pg);
+		} else 
+			this.doPageDisplayed({
+				pageid: pg.id
+			})
+	},
+	undo: function(){
+		var pv = this.pageView();
+		pv && pv.undo();
+	},
+	clear: function(){
+		var pv = this.pageView();
+		pv && pv.clear();
+	},
+	boardAction: function(sender, event){
+		var pv = this.pageView();
+		pv && pv.boardAction(event.action);
+	}
+})

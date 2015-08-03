@@ -26,13 +26,13 @@ enyo.kind({
 			kind: "blanc.Settings"
 		},{
 			name: "meetings",
-		//	kind: "blanc.Meetings"
+			kind: "blanc.Meetings"
 		},{
 			name: "people",
 		//	kind: "blanc.Attendees"
 		},{
 			name: "files",
-		//	kind: "blanc.FileList"
+			kind: "blanc.FileList"
 		},{
 			name: "widgets",
 		//	kind: "blanc:WidgetList"

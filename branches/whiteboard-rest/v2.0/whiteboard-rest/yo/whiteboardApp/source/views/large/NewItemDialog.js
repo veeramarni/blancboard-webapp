@@ -1,6 +1,6 @@
 enyo.kind({
 	name: "blanc.NewItemDialog",
-	kind: "blanc.Popup",
+	kind: "enyo.Popup",
 	classes: "popup-dialog",
 	floating: true,
 	centered: true,
@@ -38,7 +38,7 @@ enyo.kind({
 						name: "uploadTab",
 						kind: "blanc.Tab",
 						label: $L("Upload"),
-						onTabClicked: "tabCicked",
+						onTabClicked: "tabClicked",
 						index: 1
 					}]
 				}]
@@ -62,19 +62,28 @@ enyo.kind({
 	}],
 	create: function(){
 		this.inherited(arguments);
-		// if(blanc.Session.isGuest()){
-		// 	enyo.forEach(this.$.tabs.getControls(), function(e){
-		// 		e.index > 0 && e.hide();
-		// 	})
-		// }
+		if(blanc.Session.isGuest()){
+			enyo.forEach(this.$.tabs.getControls(), function(e){
+				e.index > 0 && e.hide();
+			})
+		}
 	},
 	rendered: function(){
 		this.inherited(arguments);
 		this.$.panels.setIndex(1);
+		this.files && this.filesDropped(this.files);
 	},
 	tabClicked: function(panel){
 		var pn = this.$.dialogs.getPanels()[panel.index];
 		pn && (pn.init(), this.$.dialogs.setIndex(panel.index));
+	},
+	switchTo: function(ind){
+		var index = this.$[ind];
+		index && (this.$.tabs.tabClicked(index),
+		this.tabClicked(index))
+	},
+	filesDropped: function(files){
+
 	}
 
 })
