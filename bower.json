@@ -26,7 +26,10 @@
     "raphael": "~2.1.4",
     "raphael.json": "*",
     "raphael.export": "*",
-    "raphael.free_transform": "*"
+    "raphael.free_transform": "*",
+    "jquery-timeago": "~1.4.1",
+    "jquery-dateFormat": "~1.0.2",
+    "CryptoJS": "~3.1.12"
   },
   "overrides": {
     "FlexSlider": {
