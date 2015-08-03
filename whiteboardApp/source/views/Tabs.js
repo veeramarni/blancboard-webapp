@@ -6,7 +6,9 @@ enyo.kind({
 		onTabClicked: "tabClicked"
 	},
 	tabClicked: function(e){
-
+		enyo.forEach(this.getControls(), function(tb){
+			tb instanceof blanc.Tab && tb.setActive(tb.name === e.name);
+		})
 	}
 });
 enyo.kind({

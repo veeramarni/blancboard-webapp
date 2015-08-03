@@ -1,6 +1,6 @@
 enyo.kind({
 	name: "blanc.Alert",
-	kind: "blanc.Popup",
+	kind: "enyo.Popup",
 	floating: true,
 	centered: true,
 	modal: true,
@@ -17,7 +17,7 @@ enyo.kind({
 					allowHtml: true,
 					content: "&times",
 					onclick: "closeClicked"
-				},{
+				}, {
 					name: "title",
 					tag: "h4",
 					classes: "modal-title",
@@ -29,18 +29,31 @@ enyo.kind({
 					name: "message",
 					tag: "p",
 					content: ""
+				}, {
+					name: "moreInfo",
+					tag: "p",
+					classes: "alert-danger",
+					content: ""
 				}]
 			}]
 		}]
 	}],
-	showMessage: function(title, content, html){
+	showMessage: function(title, content, html, moreInfo) {
+		this.resetMessage();
 		this.$.title.setContent(title);
-		this.$.message.setAllowHtml(html ? true: false);
+		this.$.message.setAllowHtml(html ? true : false);
 		this.$.message.setContent(content);
+		if (moreInfo) {
+			this.$.moreInfo.setContent(moreInfo);
+		} 
 		this.show();
 	},
-	closeClicked: function(){
+	closeClicked: function() {
 		this.hide();
 		return true;
+	},
+	resetMessage: function(){
+		this.$.message.setContent("");
+		this.$.moreInfo.setContent("");
 	}
 })

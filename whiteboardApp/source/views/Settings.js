@@ -98,11 +98,11 @@ enyo.kind({
 		blanc.Session.getUserInfo(function(user){
 			that.userId = user.id;
 			that.$.username.setValue(user.username);
-			that.$.email.setValue(user.email);
+			that.$.email.setValue(user.emailAddress);
 			that.$.name.setValue(user.firstName + " " + user.lastName);
 			that.$.manageAccountButton.setShowing(user.admin);
 		}, function(e){
-			console.log(e);
+			logError(e);
 		})
 	},
 	saveClicked: function(){
@@ -111,7 +111,7 @@ enyo.kind({
 				user = {
 					firstName: names[0],
 					lastName: names[1],
-					email: this.$.email.getValue(),
+					emailAddress: this.$.email.getValue(),
 					username: this.$.username.getValue()
 				},
 				n = this;

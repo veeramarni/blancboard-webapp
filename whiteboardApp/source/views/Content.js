@@ -2,7 +2,7 @@ enyo.kind({
 	name: "blanc.Content",
 	classes: "content",
 	handlers: {
-		//	onRestoreView: "restoreView",
+		onRestoreView: "restoreView",
 		onDisplayPage: "displayPage",
 		onFileOpen: "showFile",
 		//	onDisplayWidget: "displayWidget",
@@ -32,6 +32,20 @@ enyo.kind({
 			docid: docid,
 			pageno: pageno
 		})
+	},
+	restoreView: function(sender, event){
+		var that = this,
+			pgid = event.pageid;
+		if(pgid){
+			var per = blanc.Session.getPersistenceManager();
+			if(blanc.Session.isConferenceActive()){
+
+			} else {
+				per.getPageById(pgid, function(pg){
+					that.showFile(pg.assetid, pg.pageNo);
+				}, function(){})
+			}
+		}
 	},
 
 	// Following code for panels

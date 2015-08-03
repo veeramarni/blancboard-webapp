@@ -10,7 +10,7 @@ enyo.kind({
 	doc: null,
 
 	handlers: {
-		onUpdatePage: "updatePage"
+		onUpdatePage: "updatePage",
 	},
 	components: [{
 		layoutKind: "FittableColumnsLayout",
@@ -29,7 +29,7 @@ enyo.kind({
 		fit: true,
 		kind: "Panels",
 		classes: "file-content",
-		name: "content",
+		name: "contentholder",
 		draggable: false,
 		components: [{}, {
 
@@ -40,28 +40,38 @@ enyo.kind({
 	}],
 	// ...........................
 	// PROTECTED METHODS
-	create: function(){
+	create: function() {
 		this.inherited(arguments);
 		var persist = blanc.Session.getPersistenceManager(),
 			that = this;
-		persist.getDocumentById(this.docid, function(doc){
+		persist.getDocumentById(this.docid, function(doc) {
 			that.doc = doc;
 			that.$.title.setContent(doc.title);
 			that.$.filegallery.set("doc", that.doc);
 			that.displayFile();
-		}, function(err){
+		}, function(err) {
 			logError(err);
 		})
 	},
-	displayFile: function(){
-		if(!this.pageno)
+	displayFile: function() {
+		if (!this.pageno)
 			this.pageno = 1;
 		this.$.filegallery.init(this.pageno);
-		this.$.content.setIndex(2);
+		this.$.contentholder.setIndex(2);
+	},
+	updatePage: function(sender, event){
+		this.$.pageOfPages.setContent(event.pageno + "/" + event.npages);
 	},
 	// ...........................
 	// PUBLIC METHODS
-	showPage: function(pageno){
+	showPage: function(pageno) {
 		this.$.filegallery.showPage(pageno);
+	},
+	saveCurrentPageNo: function() {
+		if (this.doc && this.doc.cached) {
+			var pgno = this.$.filegallery.getCurrentPageNo();
+			if (pgno > 0)
+				blanc.Session.getPersistenceManager().updateCurrentPageNo(this.doc.id, pgno);
+		}
 	}
 })

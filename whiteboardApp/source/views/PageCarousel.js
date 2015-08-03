@@ -17,7 +17,10 @@ enyo.kind({
 	events: {
 		onPageChanged: ""
 	},
-
+	handlers: {
+		onTransitionStart: "transitionStart",
+		onTransitionFinish: "transitionFinish"
+	},
 	// ...........................
 	// PROTECTED METHODS
 	create: function() {
@@ -37,7 +40,7 @@ enyo.kind({
 			if (!this.$["container" + e]) {
 				this.createComponent({
 					name: "container" + e,
-					kind: "blanc.Page",
+					kind: "blanc.PageView",
 					pageno: e + 1,
 					docid: this.docid
 				})
@@ -55,6 +58,14 @@ enyo.kind({
 		this.$["container" + this.index] && this.$["container" + this.index].didAppear();
 		this.visible = this.$["container" + this.index];
 	},
+	transitionStart: function(sender, event){
+		return event.fromIndex === event.toIndex ? true : void 0
+	},
+	transitionFinish: function(){
+		this.loadPageView(this.index - 1);
+		this.loadPageView(this.index + 1);
+		this.signalApperance();
+	},
 	// ...........................
 	// PUBLIC METHODS
 	addPage: function() {
@@ -66,7 +77,7 @@ enyo.kind({
 			this.setAnimate(false);
 			this.setIndex(pageno);
 			this.setAnimate(t);
-			this.signaleApperance();
+			this.signalApperance();
 
 		}
 	},
@@ -88,13 +99,15 @@ enyo.kind({
 	previous: function(){
 		!this.$.animator.isAnimating() && this.inherited(arguments);
 	},
-	resizeAllPages: function(){
+	resizeHandler: function(){
+		alert("reseize handler working from pageCarousel");
 		if (this.pages.length > 0 ){
 			// only the three pages that are loaded in carousel
 			resizePageView(this.index - 1);
 			resizePageView(this.index);
 			resizePageView(this.index + 1);
 		}
+		this.inherited(arguments);
 	},
 	resizePageView: function(ind){
 		this.$["container" + ind].resizeView();
@@ -104,15 +117,18 @@ enyo.kind({
 	indexChanged: function() {
 		this.inherited(arguments);
 		this.loadNearby();
-		var index = this.getIndex();
-		this.pages && index  >=0 && this.pages.length > index && this.doPageChanged({
-			pageid : this.pages[index].id,
-			pageno : index + 1,
+		var ind = this.getIndex();
+		this.pages && ind  >=0 && this.pages.length > ind && this.doPageChanged({
+			pageid : this.pages[ind].id,
+			pageno : ind + 1,
 			npages : this.pages.length
 		})
 	},
 	pagesChanged: function() {
 		this.initContainers();
+	},
+	getPageView: function() {
+		return this.$["container" + this.index];
 	}
 
 })

@@ -1,38 +1,38 @@
 enyo.kind({
-	name: "ButtonState",
-	kind: "enyo.Object",
-	statics: {
-		ACTIVE: "ACTIVE",
-		ENABLED: "ENABLED",
-		DISABLED: "DISABLED"
-	}
+    name: "ButtonState",
+    kind: "enyo.Object",
+    statics: {
+        ACTIVE: "ACTIVE",
+        ENABLED: "ENABLED",
+        DISABLED: "DISABLED"
+    }
 });
 
 enyo.kind({
-	name: "blanc.MenuModel",
-	kind: "enyo.Object",
-	buttons: {
-		spacer: {
-			name: "spacer",
-			kind: "blanc.MenuButton",
-			classes: "",
-			state: ButtonState.DISABLED
-		},
-		meetings: {
-			name: "meetings",
-			kind: "blanc.MenuButton",
-			classes: "meetings-button",
-			tooltip: "Host or join an online meeting",
-			state: ButtonState.DISABLED
-		},
-		files: {
-			name: "files",
-			kind: "blanc.MenuButton",
-			classes: "files-button",
-			tooltip: "View list of files and whiteboard",
-			state: ButtonState.DISABLED
-		},
-		widgets: {
+    name: "blanc.MenuModel",
+    kind: "enyo.Object",
+    buttons: {
+        spacer: {
+            name: "spacer",
+            kind: "blanc.MenuButton",
+            classes: "",
+            state: ButtonState.DISABLED
+        },
+        meetings: {
+            name: "meetings",
+            kind: "blanc.MenuButton",
+            classes: "meetings-button",
+            tooltip: "Host or join an online meeting",
+            state: ButtonState.DISABLED
+        },
+        files: {
+            name: "files",
+            kind: "blanc.MenuButton",
+            classes: "files-button",
+            tooltip: "View list of files and whiteboard",
+            state: ButtonState.DISABLED
+        },
+        widgets: {
             name: "widgets",
             kind: "blanc.MenuButton",
             classes: "widgets-button",
@@ -157,83 +157,102 @@ enyo.kind({
             tooltip: $L("Voice conferencing"),
             state: ButtonState.DISABLED
         }
-	},
-	disableAll : function(){
-		for( var e in this.buttons){
-			var button = this.buttons[e];
-			button && (button.state = ButtonState.DISABLED);
-		}
-	},
-	enableDrawing: function(){
-		if(this.buttons.palette.state === ButtonState.DISABLED){
-			this.buttons.palette.state = ButtonState.ENABLED;
-			this.buttons.pen.state = ButtonState.ENABLED;
-			this.buttons.eraser.state = ButtonState.ENABLED;
+    },
+    disableAll: function() {
+        for (var e in this.buttons) {
+            var button = this.buttons[e];
+            button && (button.state = ButtonState.DISABLED);
+        }
+    },
+    enableDrawing: function() {
+        if (this.buttons.palette.state === ButtonState.DISABLED) {
+            this.buttons.palette.state = ButtonState.ENABLED;
+            this.buttons.pen.state = ButtonState.ENABLED;
+            this.buttons.eraser.state = ButtonState.ENABLED;
 
-		}
-	},
-	disableDrawing: function(){
-		this.buttons.palette.state = ButtonState.DISABLED;
-		this.buttons.pen.state = ButtonState.DISABLED;
-		this.buttons.eraser.state = ButtonState.DISABLED;
-		this.buttons.undo.state = ButtonState.DISABLED;
-		this.buttons.clear.state = ButtonState.DISABLED;
+        }
+    },
+    disableDrawing: function() {
+        this.buttons.palette.state = ButtonState.DISABLED;
+        this.buttons.pen.state = ButtonState.DISABLED;
+        this.buttons.eraser.state = ButtonState.DISABLED;
+        this.buttons.undo.state = ButtonState.DISABLED;
+        this.buttons.clear.state = ButtonState.DISABLED;
+        blanc.Session.getToolbox().set("mode", blanc.DrawMode.NONE);
 
-	},
-	enableNavigation: function(){
-		this.buttons.pages.state = ButtonState.ENABLED;
-		this.buttons.leftArrow.state = ButtonState.ENABLED;
-		this.buttons.rightArrow.state = ButtonState.ENABLED;
-	},
-	disableNavigation: function(){
-		this.buttons.pages.state = ButtonState.DISABLED;
-		this.buttons.leftArrow.state = ButtonState.DISABLED;
-		this.buttons.rightArrow.state = ButtonState.DISABLED;
-	},
-	enableContentOperations: function(){
-		this.buttons.files.state = ButtonState.ENABLED;
-		this.buttons.addDocument.state = ButtonState.ENABLED;
-		this.buttons.widgets.state = ButtonState.ENABLED;
-		this.buttons.fileMenu.state = ButtonState.ENABLED;
-	},
-	disableContentOperations: function(){
-		this.buttons.files.state = ButtonState.DISABLED;
-		this.buttons.addDocument.state = ButtonState.DISABLED;
-		this.buttons.widgets.state = ButtonState.DISABLED;
-		this.buttons.fileMenu.state = ButtonState.DISABLED;
-	},
-	togglePen: function(){
-		if(this.buttons.pen.state === ButtonState.ACTIVE){
-			this.buttons.pen.state = ButtonState.ENABLED;
-		}else {
-			this.buttons.pen.state = ButtonState.ACTIVE;
-			this.buttons.eraser.state = ButtonState.ENABLED;
-		}
-	},
-	activatePen: function(){
-		this.buttons.pen.state = ButtonState.ACTIVE;
-		this.buttons.eraser.state = ButtonState.ENABLED;
-	},
-	toggleEraser: function(){
-		if(this.buttons.eraser.state === ButtonState.ACTIVE){
-			this.buttons.eraser.state = ButtonState.ENABLED;
-
-		}else {
-			this.buttons.eraser.state = ButtonState.ACTIVE;
-			this.buttons.pen.state = ButtonState.ENABLED;
-		}
-	},
-    processSignin: function(){
+    },
+    enableNavigation: function() {
+        this.buttons.pages.state = ButtonState.ENABLED;
+        this.buttons.leftArrow.state = ButtonState.ENABLED;
+        this.buttons.rightArrow.state = ButtonState.ENABLED;
+    },
+    disableNavigation: function() {
+        this.buttons.pages.state = ButtonState.DISABLED;
+        this.buttons.leftArrow.state = ButtonState.DISABLED;
+        this.buttons.rightArrow.state = ButtonState.DISABLED;
+    },
+    enableContentOperations: function() {
+        this.buttons.files.state = ButtonState.ENABLED;
+        this.buttons.addDocument.state = ButtonState.ENABLED;
+        this.buttons.widgets.state = ButtonState.ENABLED;
+        this.buttons.fileMenu.state = ButtonState.ENABLED;
+    },
+    disableContentOperations: function() {
+        this.buttons.files.state = ButtonState.DISABLED;
+        this.buttons.addDocument.state = ButtonState.DISABLED;
+        this.buttons.widgets.state = ButtonState.DISABLED;
+        this.buttons.fileMenu.state = ButtonState.DISABLED;
+    },
+    togglePen: function() {
+        if (this.buttons.pen.state === ButtonState.ACTIVE) {
+            this.buttons.pen.state = ButtonState.ENABLED;
+            blanc.Session.getToolbox().set("mode", blanc.DrawMode.NONE);
+        } else {
+            this.buttons.pen.state = ButtonState.ACTIVE;
+            blanc.Session.getToolbox().set("mode", blanc.DrawMode.PEN);
+            this.buttons.eraser.state = ButtonState.ENABLED;
+        }
+    },
+    activatePen: function() {
+        this.buttons.pen.state = ButtonState.ACTIVE;
+        this.buttons.eraser.state = ButtonState.ENABLED;
+        blanc.Session.getToolbox().set("mode", blanc.DrawMode.PEN);
+    },
+    toggleEraser: function() {
+        if (this.buttons.eraser.state === ButtonState.ACTIVE) {
+            this.buttons.eraser.state = ButtonState.ENABLED;
+            blanc.Session.getToolbox().set("mode", blanc.DrawMode.NONE);
+        } else {
+            this.buttons.eraser.state = ButtonState.ACTIVE;
+            blanc.Session.getToolbox().set("mode", blanc.DrawMode.ERASER);
+            this.buttons.pen.state = ButtonState.ENABLED;
+        }
+    },
+    processSignin: function() {
         this.enableContentOperations();
         this.buttons.meetings.state = ButtonState.ENABLED;
         this.buttons.settings.state = ButtonState.ENABLED;
         this.buttons.invite.state = ButtonState.ENABLED;
 
     },
-	undoStateChanged: function(){
-		
-	},
-    pageChanged: function(sender, event){
+    processSignout: function(){
+        this.disableAll();
+    },
+    undoStateChanged: function(event) {
+        if (event.enable && this.buttons.undo.state == ButtonState.DISABLED) {
+            this.buttons.undo.state = ButtonState.ENABLED;
+        } else if (!event.enable && this.buttons.undo.state == ButtonState.ENABLED) {
+            this.buttons.undo.state = ButtonState.DISABLED;
+        }
+    },
+    clearStateChanged: function(event){
+        if(event.enable && this.buttons.clear.state == ButtonState.DISABLED){
+            this.buttons.clear.state = ButtonState.ENABLED;
+        } else if (!event.enable && this.buttons.clear.state == ButtonState.ENABLED){
+            this.buttons.clear.state = ButtonState.DISABLED;
+        }
+    },
+    pageChanged: function(sender, event) {
         this.enableDrawing();
         this.enableNavigation();
         this.enableContentOperations();
