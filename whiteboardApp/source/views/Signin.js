@@ -39,7 +39,7 @@ enyo.kind({
 					content: $L("Forgot password?"),
 					ontap: "doRecoverPasswordClicked"
 				}]
-			},{
+			}, {
 				name: "submitButton",
 				kind: "blanc.Button",
 				type: "submit",
@@ -56,7 +56,7 @@ enyo.kind({
 				}, {
 					tag: "a",
 					style: "display:block; margin-bottom: 40px;",
-					content:$L("Sign Up"),
+					content: $L("Sign Up"),
 					ontap: "doSignupClicked"
 				}, {
 					name: "googleSignin",
@@ -68,33 +68,45 @@ enyo.kind({
 			}]
 		}]
 	}],
-	signinClicked: function(){
-		if(this.$.fields.validate()){
-			var that = this;
-			blanc.Session.signin(this.$.email.getValue(), this.$.password.getValue(), function(){
-				that.doSignin();
-			}, function(){
-				that.doErrorAlert({
-					message: $L("Invalid username or password")
+	signinClicked: function() {
+		if (this.$.fields.validate()) {
+			var that = this,
+				params = this.getParams(),
+				err = enyo.bind(this, function(e) {
+					that.$.submitButton.reset();
+					that.doErrorAlert(err ? err : {
+						applicationMessage: "Invalid username or password",
+						errorHeader: "Login Error"
+					});
 				});
-				that.$.submitButton.reset();
-			})
-		} else 
+			blanc.Session.login(params, function() {
+				blanc.Session.connect(params.emailAddress, function() {
+						that.doSignin();
+					},
+					err)
+			}, err)
+		} else
 			this.$.submitButton.reset();
 	},
-	reset: function(){
+	getParams: function() {
+		return {
+			emailAddress: this.$.email.getValue(),
+			password: this.$.password.getValue()
+		}
+	},
+	reset: function() {
 		this.$.fields.reset();
 		this.$.submitButton.reset();
 	},
-	onEnter: function(sender, event){
-		if(event.keyCode === 13){
+	onEnter: function(sender, event) {
+		if (event.keyCode === 13) {
 			this.$.submitButton.clicked();
 			this.signinClicked();
 			return true;
-		} else 
+		} else
 			return false;
 	},
-	googleSigninClicked: function(){
+	googleSigninClicked: function() {
 
 	}
 })

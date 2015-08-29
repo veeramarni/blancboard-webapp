@@ -83,6 +83,9 @@ enyo.kind({
 			var that = this;
 			blanc.Session.getUserInfo(function(t){
 				
+			}, function(){
+				// redirect to the login page
+				
 			})
 		}
 		if(blanc.Session.getCurrentSessionDetails()){

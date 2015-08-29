@@ -33,7 +33,21 @@ enyo.kind({
 	},
 	rendered: function(){
 		this.inherited(arguments);
-		this.processSignin();
+		this.determineDeviceSize();
+		if(blanc.Session.isAuthenticated()){
+			var that = this;
+			blanc.Session.refreshSession(function(){
+				that.waterfallDown("onSessionRefreshed",{})
+			}, function(){
+				blanc.Session.signout(function(){
+					that.processSignout()
+				}, function(){})
+			})
+			this.processSignin();
+		}else {
+			this.processSignout();
+		}
+		//this.checkForUpdate();
 	},
 	processSignin: function(){
 		this.menuModel.processSignin();
@@ -99,7 +113,7 @@ enyo.kind({
 				text = text ? text + message : message;
 			}
 		}
-		var err = $L(event.applicationMessage), title = $L(event.consumerMessage) + "\n";
+		var err = $L(event.applicationMessage), title = $L(event.consumerMessage || event.errorHeader) + "\n";
     	this.$.errorAlert.showMessage(title, err, true, text);
 	},
 	determineOrientation: function(){

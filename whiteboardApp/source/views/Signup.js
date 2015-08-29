@@ -53,7 +53,7 @@ enyo.kind({
 					that.doErrorAlert(e);
 				});
 			blanc.Session.register(params, function(){
-				blanc.Session.signin(params.user.emailAddress, params.password, function(){
+				blanc.Session.connect(params.user.emailAddress, function(){
 					that.doSignin();
 				}, err)
 			}, err )

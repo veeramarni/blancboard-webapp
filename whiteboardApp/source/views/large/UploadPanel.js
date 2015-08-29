@@ -11,26 +11,28 @@ enyo.kind({
 			classes: "upload-tip",
 			components: [{
 				name: "uploadTip",
-				classes: "upload-box",
+				layoutKind: "FittableColumnsLayout",
+				classes: "dropzone upload-box",
 				allowHtml: true
 			}]
 		}]
 	}],
-	create: function(){
+	create: function() {
 		this.inherited(arguments);
-		this.$.uploadTip.setContent($L("Drag a file from your desktop and drop in this box."));
 	},
-	rendered: function(){
+	rendered: function() {
 		var that = this,
-			node = this.$.uploadTip.hasNode();
-		node.ondragenter = function(){
+			node = this.$.uploadTip.hasNode(),
+			props = new bjse.api.assets.uploadproperties({dictDefaultMessage: $L("Drag a file from your desktop and drop in this box or click to upload file")});
+		blanc.Session.getAssetManager().uploadFile(node, props);
+		node.ondragenter = function() {
 			return that.$.uploadTip.addClass("upload-box-hover"), false;
 		};
-		node.ondragleave = function(){
+		node.ondragleave = function() {
 			return that.$.uploadTip.removeClass("upload-box-hover"), false;
 		}
 	},
-	init: function(){
+	init: function() {
 		this.$.uploadTip.removeClass("upload-box-hover");
 	}
 })
