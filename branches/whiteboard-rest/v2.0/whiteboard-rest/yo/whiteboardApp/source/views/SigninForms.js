@@ -28,6 +28,10 @@ enyo.kind({
 				kind: "blanc.Signup",
 				onCancelClicked: "showSignin"
 			}, {
+				name: "recover",
+				kind: "blanc.RecoverPassword",
+				onCancelClicked: "showSignin"
+			}, {
 				name: "join",
 				kind: "blanc.JoinMeeting",
 				onSigninClicked: "showSignin"
@@ -41,30 +45,30 @@ enyo.kind({
 			content: "Copyright (c) 2015 BlancBoard"
 		}]
 	}],
-	create: function(){
+	create: function() {
 		this.inherited(arguments);
 		this.showSignin();
 	},
-	showSignin: function(){
+	showSignin: function() {
 		this.$.signin.reset();
 		this.$.panels.setIndex(0);
 		return true;
 	},
-	showJoin: function(){
+	showJoin: function() {
 		this.$.panels.setIndex(3);
 		return true;
 	},
-	showSignup: function(){
+	showSignup: function() {
 		this.$.signup.reset();
 		this.$.panels.setIndex(1);
 		return true;
-	}, 
-	recoverClicked: function(){
+	},
+	recoverClicked: function() {
 		this.$.recover.reset();
 		this.$.panels.setIndex(2);
 		return true;
 	},
-	showResetPassword: function(){
+	showResetPassword: function() {
 		this.$.resetPassword.reset();
 		this.$.panels.setIndex(4);
 		return true;

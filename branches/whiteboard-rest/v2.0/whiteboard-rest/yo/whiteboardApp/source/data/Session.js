@@ -3,7 +3,7 @@ enyo.kind({
     kind: "enyo.Object",
     statics: {
         MAX_FREE_PAGES: 6,
-        SERVERURL: "http://localhost:8080/",
+        SERVERURL: "http://127.0.0.1:8080/",
         APIPATH: "v1.0",
         APP_ID: "353b302c44574f565045687e534e7d6a",
         APP_SECRET: "286924697e615a672a646a493545646c",
@@ -44,44 +44,47 @@ enyo.kind({
                 model: blanc.Session.guessModel()
             })
         },
-        signin: function(email, password, success, error){
+        connect: function(email, success, error) {
             var that = this;
-            if (!email || !password){
+            if (!email) {
                 error();
                 return void 0;
             }
-            var clearWhenErr = function(e){
-                try {
-                    blanc.Session.clearCredentials();
-                } catch (err){
-                    error(err);
-                }
-            }, sync = function(user){
-                that.setUserId(user.id);
-                blanc.Session.getSyncManager().synchronize(function(){});
-                success(user);
-            };
-            this.getRuntime().connect(email, password, this.APP_ID, this.APP_SECRET, this.getDevice(), function(session){
+            var clearWhenErr = function(e) {
+                    try {
+                        blanc.Session.clearUserData();
+                        error(e);
+                    } catch (err) {
+                        error(e);
+                        logError(err);
+                    }
+                },
+                sync = function(user) {
+                    that.setUserId(user.id);
+                    blanc.Session.getSyncManager().synchronize(function() {});
+                    success(user);
+                };
+            this.getRuntime().connect(email, this.APP_ID, this.APP_SECRET, this.getDevice(), function(session) {
                 that.baseSession = session;
                 that.premium = session.user.accountType == bjse.api.users.AccountType.PREMIUM;
                 //that.saveCredentials(session.user.id);
                 var persist = blanc.Session.getPersistenceManager();
-                persist.getUserById(session.user.id, function(){
+                persist.getUserById(session.user.id, function() {
                     //if user exists then update
                     persist.updateUser(session.user, sync, clearWhenErr);
-                }, function(){
+                }, function() {
                     //fails if the user doesn't exist
                     persist.storeUser(session.user, sync, clearWhenErr)
                 })
             }, clearWhenErr)
         },
-        signinAsGuest: function(firstName, lastName, success, error){
+        signinAsGuest: function(firstName, lastName, success, error) {
             var that = this,
-                complete = function(user){
+                complete = function(user) {
                     that.setUserId(user.id);
                     success(user)
                 };
-            this.getRuntime().connectAsGuest(this.APP_ID, this.APP_SECRET, this.getDevice(), function(){
+            this.getRuntime().connectAsGuest(this.APP_ID, this.APP_SECRET, this.getDevice(), function() {
                 var user = new bjse.api.users.User({
                     id: '',
                     firstName: firstName,
@@ -93,43 +96,59 @@ enyo.kind({
 
             }, error)
         },
-        signout: function(success, error){
+        refreshSession: function(success, error) {
+            if (!this.getUserId) {
+                error();
+                return void 0;
+            }
+            this.getRuntime().refresh(this.getUserId(), this.APP_ID, this.APP_SECRET, this.getDevice(), function(session) {
+                var persist = blanc.Session.getPersistenceManager();
+                persist.updateUser(session.user, function() {
+                    blanc.Session.getSyncManager().synchronize(function() {});
+                    success(session.user);
+                }, error);
+            }, error)
+
+        },
+        signout: function(success, error) {
             var that = this,
-                complete = function(){
+                complete = function() {
                     that.baseSession = null;
                     that.premium = false
                     var persist = blanc.Session.getPersistenceManager();
-                    persist.deleteUser(blanc.Session.getUserId(), function(){
+                    persist.deleteUser(blanc.Session.getUserId(), function() {
                         that.getSyncManager().clearTimestamp();
                         that.clearUserData();
-                        persist.deleteAllDocuments(function(){
+                        persist.deleteAllDocuments(function() {
                             success();
-                        },function(){
-                        logError("failed to clear the document cache");
-                        error();
-                    }
-                        )
-                    }, error )
+                        }, function() {
+                            logError("failed to clear the document cache");
+                            error();
+                        })
+                    }, error)
                 }
-                this.getBaseSession() ? this.getBaseSession().disconnect(complete, complete) : complete();
+            this.getBaseSession() ? this.getBaseSession().disconnect(complete, complete) : complete();
         },
-        register: function(params, success, error){
+        register: function(params, success, error) {
             this.getRuntime().register(params, this.APP_ID, this.APP_SECRET, success, error);
+        },
+        login: function(params, success, error){
+            this.getRuntime().login(params, this.APP_ID, this.APP_SECRET, success, error);
         },
         getDeviceId: function() {
             var e = localStorage.getItem("blanc_deviceid");
             return e || (e = bjse.util.randomUUID(), localStorage.setItem("blanc_deviceid", e)), e
         },
-        setConference: function(conference){
+        setConference: function(conference) {
             this.conferenceSession = conference;
         },
-        isConferenceActive: function(){
+        isConferenceActive: function() {
             return this.conferenceSession != null;
         },
-        getConference: function(){
+        getConference: function() {
             return this.conferenceSession;
         },
-        getConferenceManager: function(){
+        getConferenceManager: function() {
             return this.getBaseSession().getConferenceManager();
         },
         guessModel: function() {
@@ -148,8 +167,8 @@ enyo.kind({
             session = bjse.util.extend(ses, session);
             localStorage.setItem("current_session", JSON.stringify(session));
         },
-        clearUserData: function(){
-            localStorage.removeItem("blanc_session_userid");
+        clearUserData: function() {
+            localStorage.removeItem("blanc_userid");
         },
         getCurrentSessionDetails: function() {
             return JSON.parse(localStorage.getItem("current_session"));
@@ -167,15 +186,14 @@ enyo.kind({
         getToolbox: function() {
             return this.toolbox || (this.toolbox = new blanc.Toolbox, this.toolbox);
         },
-        getSyncManager: function(){
+        getSyncManager: function() {
             return this.syncManager || (this.syncManager = new blanc.SyncManager, this.syncManager);
         },
-        getAssetManager: function(){
-            return this.baseSession.getAssetManager();
+        getAssetManager: function() {
+            return this.getBaseSession().getAssetManager();
         },
-        isAuthenticated: function(){
-            //return !!this.getBaseSession().username;
-            return true;
+        isAuthenticated: function() {
+            return null != this.getUserId();
         },
         isDrawing: function() {
             return this.getToolbox().isToolboxActive();
