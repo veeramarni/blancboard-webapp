@@ -5,7 +5,7 @@ bjse.api.Exception = function(code, message) {
 bjse.api.Runtime = function(serverUrl) {
 	this.serverUrl = serverUrl;
 };
-bjse.api.Runtime.prototype.connect = function(username, password, appid, secret, device, success, error) {
+bjse.api.Runtime.prototype.connect = function(username, appid, secret, device, success, error) {
 	var session = new bjse.api.Session(this, device, appid, secret, username);
 	session.getUserDirectory().getUser(username, function(user) {
 		session.user = user;
@@ -17,6 +17,14 @@ bjse.api.Runtime.prototype.connect = function(username, password, appid, secret,
 		}, error)
 	}, error);
 };
+bjse.api.Runtime.prototype.refresh = function(userid, appid, secret, device, success, error) {
+	var session = new bjse.api.Session(this, device, appid, secret, userid);
+	session.getUserDirectory().getUser(userid, function(user) {
+		session.user = user;
+		session.username = user.id;
+		success(session);
+	}, error);
+};
 bjse.api.Runtime.prototype.register = function(params, appid, secret, success, error) {
 	var url = bjse.util.format("{$apiurl}/users", {
 			apiurl: this.serverUrl
@@ -24,9 +32,25 @@ bjse.api.Runtime.prototype.register = function(params, appid, secret, success, e
 		headers = {
 			'Authorization': 'Basic ' + bjse.api.Runtime.getApplicationToken(appid, secret)
 		};
-	bjse.api.Ajax.login(url, params, function(response) {
+	bjse.api.Ajax.register(url, params, function(response) {
 		var user = new bjse.api.users.User(response.apiUser);
 		success(user);
+	}, error, headers);
+};
+bjse.api.Runtime.prototype.login = function(params, appid, secret, success, error) {
+	var url = bjse.util.format("{$apiurl}/../oauth/token", {
+			apiurl: this.serverUrl
+		}),
+		headers = {
+			'Authorization': 'Basic ' + bjse.api.Runtime.getApplicationToken(appid, secret)
+		},
+		request = {
+			"username": params.emailAddress,
+			"password": params.password,
+			"grant_type": "password"
+		}
+	bjse.api.Ajax.login(url, request, function(response) {
+		success();
 	}, error, headers);
 };
 bjse.api.Runtime.prototype.connectAsGuest = function(device, appId, secret, success) {
@@ -59,7 +83,7 @@ bjse.api.Session.prototype.getHttpClient = function() {
 bjse.api.Session.prototype.getConferenceManager = function() {
 	return this.conferenceManager || (this.conferenceManager = new bjse.api.conference.ConferenceManager(this), this.conferenceManager);
 };
-bjse.api.Session.prototype.getAssetManager = function(){
+bjse.api.Session.prototype.getAssetManager = function() {
 	return this.assetManager || (this.assetManager = new bjse.api.assets.AssetManager(this), this.assetManager);
 };
 bjse.api.Session.prototype.getAccountManager = function() {

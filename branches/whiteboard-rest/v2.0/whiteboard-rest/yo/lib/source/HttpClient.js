@@ -1,41 +1,58 @@
 bjse.api.Ajax = (function() {
-	var _post = function(url, data, success, error, headers) {
-		var endError = function(res) {
-			error(res.responseJSON);
-		};
-		$.ajax({
-			url: url,
-			type: "POST",
-			contentType: "application/json",
-			data: JSON.stringify(data),
-			dataType: "json",
-			headers: headers,
-			success: success,
-			error: endError
-		})
-	};
-	return {
-		get: function(url, data, success, error, headers) {
+	var _endError = function(jqXHR, ajaxOptions, thrownError) {
+			if (jqXHR.status === 0) {
+				return new bjse.api.errors.error({
+					applicationMessage: "Check your network",
+					errorHeader: "Network error"
+				});
+			} else {
+				return jqXHR.responseJSON ? jqXHR.responseJSON : logError("Can't find the root cause of the http issue");
+			}
+		},
+		_post = function(url, data, success, error, headers) {
 			var endError = function(res) {
-				error(res.responseJSON);
+				var err = _endError(res);
+				error(err);
+			};
+			$.ajax({
+				url: url,
+				type: "POST",
+				contentType: "application/json",
+				data: data,
+				dataType: "json",
+				success: success,
+				error: endError,
+				headers: headers
+			})
+		},
+		_get = function(url, data, success, error, headers) {
+			var endError = function(res) {
+				var err = _endError(res);
+				error(err);
 			};
 			$.ajax({
 				url: url,
 				type: "GET",
 				contentType: "application/json",
-				data: JSON.stringify(data),
+				data: data,
 				dataType: "json",
-				headers: headers,
 				success: success,
-				error: endError
+				error: endError,
+				headers: headers
 			})
+		};
+
+	return {
+		get: function(url, data, success, error, headers) {
+			_get(url, JSON.stringify(data), success, error, headers);
 		},
 		post: function(url, data, success, error, headers) {
-			_post(url, data, success, error, headers);
+			_post(url, JSON.stringify(data), success, error, headers);
 		},
 		put: function(url, data, success, error, headers) {
 			var endError = function(res) {
-				error(res.responseJSON);
+				var err = _endError(res);
+				error(err);
 			};
 			$.ajax({
 				url: url,
@@ -50,7 +67,8 @@ bjse.api.Ajax = (function() {
 		},
 		del: function(url, data, success, error, headers) {
 			var endError = function(res) {
-				error(res.responseJSON);
+				var err = _endError(res);
+				error(err);
 			};
 			$.ajax({
 				url: url,
@@ -63,9 +81,15 @@ bjse.api.Ajax = (function() {
 				error: endError
 			})
 		},
-		login: function(url, data, success, error, headers) {
-			_post(url, data, function(response) {
+		register: function(url, data, success, error, headers) {
+			_post(url, JSON.stringify(data), function(response) {
 				bjse.api.Cookie.set('authToken', response.oauth2AccessToken.access_token);
+				success(response);
+			}, error, headers)
+		},
+		login: function(url, data, success, error, headers) {
+			_get(url, $.param(data), function(response) {
+				bjse.api.Cookie.set('authToken', response.access_token);
 				success(response);
 			}, error, headers)
 		}

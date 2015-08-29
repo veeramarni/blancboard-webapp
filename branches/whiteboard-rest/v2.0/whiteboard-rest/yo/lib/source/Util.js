@@ -107,5 +107,15 @@ bjse.util = {
                 if (arguments[i].hasOwnProperty(key))
                     arguments[0][key] = arguments[i][key];
         return arguments[0];
+    },
+    /**
+    *   Regex output for the file mimetype support
+    *    example: /(\.|\/)(msword|vnd.ms-excel)$/i
+    *
+    */
+    getRegexFileTypeSupport: function(fileTypes){
+        new RegExp('(\\.|\\/)(' + Object.keys(fileTypes).map(function(key) {
+     return key.split('/')[1]
+    }).join('|') + ')$', 'i');
     }
 }
