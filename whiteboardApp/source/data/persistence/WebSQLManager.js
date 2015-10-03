@@ -33,10 +33,10 @@ enyo.kind({
 			success(user);
 		})
 	},
-	getUserById: function(userid, success, error) {
+	getUserById: function(userId, success, error) {
 		var user = null;
 		this.db.transcation(function(t) {
-			t.executeSql("SELECT * FROM users WHERE id = ?", [userid], function(e, t) {
+			t.executeSql("SELECT * FROM users WHERE id = ?", [userId], function(e, t) {
 				var row = t.rows.length;
 				if (row > 0) {
 					var u = t.rows.item(0);
@@ -48,11 +48,11 @@ enyo.kind({
 			})
 		})
 	},
-	deleteUser: function(userid, success, error) {
+	deleteUser: function(userId, success, error) {
 		this.db.transaction(function(t) {
-			t.executeSql("DELETE FROM users WHERE id = ?", [userid]);
+			t.executeSql("DELETE FROM users WHERE id = ?", [userId]);
 		}, error, function() {
-			success(userid);
+			success(userId);
 		})
 	}
 })

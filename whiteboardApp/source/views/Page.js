@@ -7,6 +7,10 @@ enyo.kind({
 	// PUBLIC PROPERTIES
 	page: null,
 
+    // CONSTANTS
+    PAGEWIDTH: 768,
+    PAGEHEIGHT: 606,
+
 	events: {
 		onPageRendered: "",
 		onPageDisplayed: ""
@@ -40,16 +44,16 @@ enyo.kind({
 		}
 		this.page = pg;
 		this.resizeView();
-		if (pg.previewid) {
+		if (pg.previewId) {
 			var that = this;
-			blanc.Session.getPersistenceManager().getBlobURL(pg.previewid, function(blob) {
+			blanc.Session.getPersistenceManager().getBlob(pg.previewId, function(blob) {
 				that.$.image.setSrc(blob);
 			}, function(err) {
 				logError("Failed to load image due to " + err);
 			})
+		} else {
+			this.$.board && (this.$.board.addClass("sketchbook-page-image"), this.raisePageRendered());
 		}
-		this.$.board && this.$.board.addClass("sketchbook-page-image");
-		this.raisePageRendered();
 	},
 	displayPage: function(pg) {
 		this.destroyComponents();
@@ -99,19 +103,21 @@ enyo.kind({
 			this.$.board.didAppear();
 		}
 		this.doPageDisplayed({
-			pageid: this.page.id
+			pageId: this.page.id
 		})
 
 	},
 	raisePageRendered: function() {
 		this.page && this.doPageRendered({
-			pageid: this.page.id
+			pageId: this.page.id
 		});
 	},
 	resizeView: function() {
 		this.resize();
 		if (this.$.board != null && this.$.image != null) {
 			var node = this.hasNode();
+			this.page.width = this.page.width || (logWarn("Page with id " + this.page.id + " doesn't have width defined"), this.PAGEWIDTH);
+			this.page.height = 	this.page.height || (logWarn("Page with id " + this.page.id + " doesn't have height defined"), this.PAGEHEIGHT);	
 			if (node) {
 				var h = node.clientHeight,
 					w = node.clientWidth,
@@ -137,7 +143,7 @@ enyo.kind({
 		this.$.board && this.$.board.clear();
 	},
 	boardAction: function(action){
-		this.$.board && this.page.id === action.pageid && this.$.board.boardAction(action);
+		this.$.board && this.page.id === action.pageId && this.$.board.boardAction(action);
 	}
 
 })

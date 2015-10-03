@@ -4,6 +4,7 @@ enyo.kind({
 	handlers: {
 		onFileOpen: "openFile",
 		onFileSelected: "fileSelected",
+		onPageSelected: "pageSelected",
 	},
 	components: [{
 		style: "width: 100%; height: 100%; position: relative;",
@@ -54,30 +55,37 @@ enyo.kind({
 		this.$.dialog.destroy();
 		p && this.showNewItemDialog(p);
 	},
-	toggleLeftMenu: function(e) {
-		this.$.leftPanel.toggle(e);
+	toggleLeftMenu: function(menuName) {
+		this.$.leftPanel.toggle(menuName);
 	},
-	toggleRightMenu: function(e) {
-		this.$.rightPanel.toggle(e);
+	toggleRightMenu: function(menuName) {
+		this.$.rightPanel.toggle(menuName);
 	},
-	closeMenu: function(e) {
+	closeMenu: function(menuName) {
 		if (this.$.leftPanel.isOpen()) {
-			this.$.leftPanel.close(e);
+			this.$.leftPanel.close(menuName);
 		}
 		if (this.$.rightPanel.isOpen()) {
-			this.$.rightPanel.close(e);
+			this.$.rightPanel.close(menuName);
 		}
 	},
 	openFile: function(sender, event) {
 		this.$.dialog && this.$.dialog.hide();
-		this.$.content.showFile(event.docid, 1);
+		this.$.content.showFile(event.docId, 1);
 	},
 	fileSelected: function(sender, event) {
 		var that = this;
 		this.closeMenu(function() {
-			that.$.content.showFile(event.docid, 0)
+			that.$.content.showFile(event.docId, event.pageNo ? event.pageNo : 0)
 		});
 		return true
+	},
+	pageSelected: function(sender, event){
+		var that = this;
+		this.closeMenu(function(){
+			that.$.content.showPage(event.pageNo);
+		})
+		
 	},
 	fileRemovedClicked: function(sender, event) {
 

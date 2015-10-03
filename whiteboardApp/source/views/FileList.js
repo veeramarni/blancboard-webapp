@@ -7,7 +7,10 @@ enyo.kind({
 	},
 	handlers: {
 		onFileCreated: "reload",
-		onFileDeleted: "reload"
+		onFileDeleted: "reload",
+		onClearContent: "clearSelection",
+		onThumbnailUpdated: "thumbnailUpdated",
+		onFileDownloaded: "reload"
 	},
 	components: [{
 		kind: "blanc.Toolbar",
@@ -28,7 +31,7 @@ enyo.kind({
 		onSetupItem: "setupItem",
 		enableSwipe: false,
 		components: [{
-			name: "fileitems",
+			name: "fileItem",
 			classes: "mm-file-item",
 			kind: "blanc.FileItem",
 			ontap: "fileTap",
@@ -46,8 +49,11 @@ enyo.kind({
 			this.updateSelection();
 		} else {
 			this.populateList();
-			//get data from the server
-			//..to do
+			var that = this;
+			// Synchronize with the server
+			blanc.Session.getSyncManager().synchronize(function(t) {
+				t && that.populateList();
+			})
 		}
 	},
 	clearSelection: function() {
@@ -67,22 +73,22 @@ enyo.kind({
 		});
 
 	},
-	searchIn: function(sender, event){
+	searchIn: function(sender, event) {
 		enyo.job(this.id + ":search", this.bindSafely('filterList', sender.$.searchInput.getValue()), 300)
 	},
 	updateSelection: function() {
 		var sel = this.$.list.getSelection().getSelected(),
 			k = Object.keys(sel).length > 0,
 			currentObj = blanc.Session.getCurrentSessionDetails();
-		for (var i = 0, curdocid = -1; i < this.files.length; i++) {
-			if (this.files[i].id == currentObj.docid) {
-				curdocid = i;
+		for (var i = 0, curdocId = -1; i < this.files.length; i++) {
+			if (this.files[i].id == currentObj.docId) {
+				curdocId = i;
 				break;
 			}
 		}
-		if (curdocid >= 0) {
-			this.$.list.getSelected().select(curdocid);
-			this.currentDocId = curdocid;
+		if (curdocId >= 0) {
+			this.$.list.getSelected().select(curdocId);
+			this.currentDocId = curdocId;
 		} else {
 			this.clearSelection();
 			this.currentDocId = null;
@@ -107,8 +113,8 @@ enyo.kind({
 			r = [];
 		for (var i = 0, d;
 			(d = this.files[i]); i++) {
-			if (d.title.match(re)) {
-			//	d.dbIndex = i;
+			if ((d.title && d.title.match(re)) || (d.fileName && d.fileName.match(re))) {
+				//	d.dbIndex = i;
 				r.push(d);
 			}
 		}
@@ -119,34 +125,82 @@ enyo.kind({
 			data = this.filtered ? this.filtered : this.files;
 		if (data && !(data.length <= ind && data[ind] != null)) {
 			var file = data[ind];
-			this.$.fileitems.setFileName(file.title);
-			var imgid = "thumb_" + file.id;
-			this.$.fileitems.$.image.setId(imgid);
-			(file.timeModified || file.timeCreated) && this.$.fileitems.setDate(new Date(file.timeModified || file.timeCreated));
+			this.$.fileItem.setFileName(file.title || file.fileName);
+			var imgId = "thumb_" + file.id;
+			this.$.fileItem.$.image.setId(imgId);
+			(file.timeUpdated || file.timeCreated) && this.$.fileItem.setDate(new Date(file.timeUpdated || file.timeCreated));
+			var that = this;
+			if (file.image != null || !file.thumbUrl &&
+				file.mimeType != BLANC_MIME_TYPE) {
+				logDebug("Setting thumb directly img [" + imgId + "] of "+ file.id + " with title name " + file.title);
+				file.image != null 
+							? this.$.fileItem.$.image.setSrc(file.image) : file.state == LifecycleState.ERROR 
+									? (this.$.fileItem.setComment($L("Conversion error")),
+										this.$.fileItem.$.image.setSrc("../../assets/placeholder.png")) : (this.$.fileItem.setComment($L("Processing ... Please wait")),
+					this.$.fileItem.$.image.setSrc("../../assets/ajax-loader.gif"));
+			} else {
+				var persist = blanc.Session.getPersistenceManager(),
+					postAction = function(blb) {
+						logDebug("Setting thumb img [" + imgId + "] of "+ file.id + " with title name " + file.title);
+						var el = document.getElementById(imgId);
+						el && (el.src = blb);
+						data[ind] && (data[ind].image = blb);
 
-			var persist = blanc.Session.getPersistenceManager();
-			persist.getBlob(imgid);
+					};
+				persist.getBlob(imgId, function(e) {
+					postAction(e);
+				}, function(event) {
+					if (event.code == 404 && file.thumbUrl) {
+						persist.downloadBlob(file.id, imgId, file.thumbUrl, function() {
+							persist.getBlob(imgId, function(e) {
+								postAction(e)
+							}, function(err) {
+								logError(err);
+							})
+						}, function(err) {
+							logError(err)
+						})
+					} else {
+						// no image found 
+						var el = document.getElementById(imgId);
+						el && (el.src = "../../assets/placeholder.png");
+						data[ind] && (data[ind].image = "../../assets/placeholder.png");
+					}
+				})
+			}
+			this.$.fileItem.addRemoveClass("mm-first-file-item", ind == 0);
+			data && this.$.fileItem.addRemoveClass("mm-last-file-item", ind == data.length - 1);
+			this.$.fileItem.setSelected(sender.isSelected(ind));
+			return true;
 		}
-		this.$.fileitems.addRemoveClass("mm-first-file-item", ind == 0);
-		data && this.$.fileitems.addRemoveClass("mm-last-file-item", ind == data.length - 1);
-		this.$.fileitems.setSelected(sender.isSelected(ind));
-		return true;
 	},
 	fileTap: function(sender, event) {
 		var file = this.files[event.index];
-		this.doFileSelected({
-			docid: file.id
+		file.state == LifecycleState.READY && this.doFileSelected({
+			docId: file.id
 		})
 	},
 	removeItem: function(sender, event) {
 		var file = this.files[event.index];
-		logDebug("File remove clicked " );
+		logDebug("File remove clicked ");
 		this.doFileRemoveClicked({
-			docid: file.id,
+			docId: file.id,
 			currentView: file.id == this.currentDocId
 		});
 		return true;
 	},
+	thumbnailUpdated: function(sender, event){
+		var el = document.getElementById("thumb_" + event.docId);
+		if(el){
+			el.src = event.data;
+			for(var i =0; this.files != null && i < this.files.length; i++){
+				if(this.files[i].id == event.docId){
+					this.files[i].image = event.data;
+					break;
+				}
+			}
+		}
+	}
 })
 
 enyo.kind({
@@ -192,8 +246,13 @@ enyo.kind({
 	setSelected: function(selected) {
 		this.addRemoveClass("mm-item-selected", selected);
 	},
-	removeTap: function(sender, event){
-		this.doFileRemoved({index: event.index})
+	setComment: function(comment) {
+		this.$.date.setContent(comment);
+	},
+	removeTap: function(sender, event) {
+		this.doFileRemoved({
+			index: event.index
+		})
 		return true;
 	}
 })

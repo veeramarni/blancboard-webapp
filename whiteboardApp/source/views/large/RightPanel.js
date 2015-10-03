@@ -24,7 +24,7 @@ enyo.kind({
 		draggable: false,
 		components: [{
 			name: "pages",
-		//	kind: "blanc.Pages"
+			kind: "blanc.PagesList"
 		},{
 			name: "fileMenu",
 		//	kind: "blanc.FileMenu"
@@ -61,11 +61,11 @@ enyo.kind({
 		}
 		return true;
 	},
-	toggle: function(e){
+	toggle: function(panelName){
 		if(this.isClosed()){
-			for(var panels = this.$.panels.getPanels(), n=0; n < panels.lenght; n++){
+			for(var panels = this.$.panels.getPanels(), n=0; n < panels.length; n++){
 				var panel = panels[n];
-				if(panel.getName() == e){
+				if(panel.getName() == panelName){
 					this.$.panels.setIndexDirect(n);
 					this.open(function(){
 						panel.init();
@@ -78,8 +78,8 @@ enyo.kind({
 		this.close();
 		return false;
 	},
-	itemSelected: function(e, t){
-	    this.close(t.completion);
+	itemSelected: function(sender, event){
+	    this.close(event.completion);
 	    return true;
 	}
 })

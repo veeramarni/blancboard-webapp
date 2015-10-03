@@ -115,7 +115,7 @@ enyo.kind({
 					username: this.$.username.getValue()
 				},
 				n = this;
-			blanc.Session.getUserDirectory().updateUser(this.userid, user, function(){
+			blanc.Session.getUserDirectory().updateUser(this.userId, user, function(){
 
 			}, function(e){
 				n.$.saveButton.reset();

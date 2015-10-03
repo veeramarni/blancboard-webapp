@@ -69,12 +69,12 @@ enyo.kind({
         if (this.reset(), this.persistent) {
             var t = blanc.Session.getPersistenceManager(),
                 n = new mc.api.canvas.Path;
-            n.pathid = mc.util.randomUUID(), n.pageid = this.page.id, n.assetid = this.page.assetid, n.timestamp = (new Date).getTime(), t.storePath(n, function() {}, function() {
+            n.pathid = mc.util.randomUUID(), n.pageId = this.page.id, n.assetId = this.page.assetId, n.timestamp = (new Date).getTime(), t.storePath(n, function() {}, function() {
                 self.log("failed to clear")
             })
         }
         var i = new mc.api.canvas.PageAction;
-        i.type = mc.api.canvas.ActionType.CLEAR, i.pageid = this.page.id, this.addActionToLog(i), e && this.raiseAction(i)
+        i.type = mc.api.canvas.ActionType.CLEAR, i.pageId = this.page.id, this.addActionToLog(i), e && this.raiseAction(i)
     },
     undo: function() {
         this.undoAction(!0)
@@ -82,7 +82,7 @@ enyo.kind({
     undoAction: function(e) {
         if (this.reset(), this.restorePaths(!0), e) {
             var t = new mc.api.canvas.PageAction;
-            t.type = mc.api.canvas.ActionType.UNDO, t.pageid = this.page.id, this.raiseAction(t)
+            t.type = mc.api.canvas.ActionType.UNDO, t.pageId = this.page.id, this.raiseAction(t)
         }
     },
     midPoint: function(e, t) {
@@ -167,9 +167,9 @@ enyo.kind({
         }
         var h = mc.api.canvas.Segment.segments(this.points),
             d = new mc.api.canvas.Path;
-        d.id = mc.util.randomUUID(), d.pageid = this.page.id, d.assetid = this.page.assetid, d.mode = i.getMode(), d.color = i.getColor(), d.width = i.getWidth(), d.segments = h, d.timestamp = (new Date).getTime(), this.savePath(d);
+        d.id = mc.util.randomUUID(), d.pageId = this.page.id, d.assetId = this.page.assetId, d.mode = i.getMode(), d.color = i.getColor(), d.width = i.getWidth(), d.segments = h, d.timestamp = (new Date).getTime(), this.savePath(d);
         var u = new mc.api.canvas.PageAction;
-        return u.pageid = this.page.id, u.path = d, u.type = mc.api.canvas.ActionType.PATH, this.addActionToLog(u), this.raiseAction(u), this.points = null, !0
+        return u.pageId = this.page.id, u.path = d, u.type = mc.api.canvas.ActionType.PATH, this.addActionToLog(u), this.raiseAction(u), this.points = null, !0
     },
     savePath: function(e) {
         if (this.persistent) {
@@ -284,7 +284,7 @@ enyo.kind({
         }), this.thumbnailUpdateTimer && clearTimeout(this.thumbnailUpdateTimer), this.scheduleThumbnailUpdate()
     },
     scheduleThumbnailUpdate: function() {
-        if (!this.page.previewid) {
+        if (!this.page.previewId) {
             var e = this;
             this.thumbnailUpdateTimer = setTimeout(function() {
                 e.updateThumbnail()
@@ -301,18 +301,18 @@ enyo.kind({
             i = this,
             o = blanc.Session.getPersistenceManager(),
             s = function(e, t) {
-                o.storeBlob(e.thumbid, e.assetid, t, function() {
+                o.storeBlob(e.thumbId, e.assetId, t, function() {
                     i.doThumbnailUpdated({
                         id: e.id,
-                        docid: e.assetid,
-                        pageno: e.pageNo,
+                        docId: e.assetId,
+                        pageNo: e.pageNo,
                         data: t
                     })
                 }, function() {
                     console.log("Failed to store blob")
                 })
             };
-        this.page.thumbid ? s(this.page, n) : (this.page.thumbid = mc.util.randomUUID(), o.updatePage(this.page, function(e) {
+        this.page.thumbId ? s(this.page, n) : (this.page.thumbId = mc.util.randomUUID(), o.updatePage(this.page, function(e) {
             s(e, n)
         }, function() {
             console.log("Failed to update page")

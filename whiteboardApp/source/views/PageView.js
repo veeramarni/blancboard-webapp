@@ -5,8 +5,8 @@ enyo.kind({
 	// ...........................
 	// PUBLIC PROPERTIES
 	visible: false,
-	pageno: null,
-	docid: null,
+	pageNo: null,
+	docId: null,
 
 	handlers: {
 		onMeetingStarted: "meetingStarted"

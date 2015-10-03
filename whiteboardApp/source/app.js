@@ -8,7 +8,7 @@ enyo.kind({
 	name: "blanc.Application",
 	kind: "enyo.Application",
 	view: "blanc.MainView"	
-	//view: "blanc.SigninForms"
+	//view: "blanc.PagesList"
 });
 
 enyo.ready(function() {

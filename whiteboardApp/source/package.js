@@ -1,6 +1,7 @@
 enyo.depends(
 	// for deploying (temporary fix) replace $lib/../ to $lib//
 	"$lib/../jquery/dist/jquery.js",
+	"$lib/../lodash/lodash.js", // for utility
 	"$lib/../raphael/raphael.js",
 	"$lib/../raphael.json/raphael.json.js",
 	"$lib/../CryptoJS/src/core.js",
@@ -9,8 +10,7 @@ enyo.depends(
 	"$lib/../raphael.export/raphael.export.js",
 	"$lib/../raphael.free_transform/raphael.free_transform.js",
 	"$lib/../jquery-dateFormat/dist/dateFormat.js",
-	//"$lib/../jquery-file-upload/js/vendor/jquery.ui.widget.js",
-	//"$lib/../jquery-file-upload/js/jquery.fileupload.js",
+	"$lib/../atmosphere-javascript/modules/javascript/src/main/webapp/javascript/atmosphere.js",
 	"$lib/../dropzone/dist/dropzone.js",
 	"$lib/../layout",
 	"$lib/../onyx",

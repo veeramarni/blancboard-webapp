@@ -74,7 +74,7 @@ enyo.kind({
 				params = this.getParams(),
 				err = enyo.bind(this, function(e) {
 					that.$.submitButton.reset();
-					that.doErrorAlert(err ? err : {
+					that.doErrorAlert(e ? e : {
 						applicationMessage: "Invalid username or password",
 						errorHeader: "Login Error"
 					});

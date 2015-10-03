@@ -23,7 +23,18 @@ enyo.kind({
 	rendered: function() {
 		var that = this,
 			node = this.$.uploadTip.hasNode(),
-			props = new bjse.api.assets.uploadproperties({dictDefaultMessage: $L("Drag a file from your desktop and drop in this box or click to upload file")});
+			props = new bjse.api.assets.uploadproperties({
+				dictDefaultMessage: $L("Drag a file from your desktop and drop in this box or click to upload file")
+			}),
+			error = function(err) {
+				// some how notify the error
+				logError("UploadPanel.js: Some how notify the error to user " + err);
+			},
+			success = function(res) {
+				blanc.Session.getSyncManager().createDocument(doc, function() {
+
+				}, error);
+			};
 		blanc.Session.getAssetManager().uploadFile(node, props);
 		node.ondragenter = function() {
 			return that.$.uploadTip.addClass("upload-box-hover"), false;

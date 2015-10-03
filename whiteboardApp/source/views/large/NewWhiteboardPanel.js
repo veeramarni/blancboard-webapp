@@ -85,10 +85,10 @@ enyo.kind({
 		blanc.Session.getPersistenceManager().createWhiteboard(name, function(e) {
 			that.$.submit.reset();
 			that.doFileCreated({
-				docid: e.id
+				docId: e.id
 			});
 			that.doFileOpen({
-				docid: e.id
+				docId: e.id
 			});
 		}, function(e) {
 			that.$.submit.reset();

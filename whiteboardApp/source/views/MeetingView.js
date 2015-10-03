@@ -53,7 +53,7 @@ enyo.kind({
 			curpn.displayPage(pg);
 		} else 
 			this.doPageDisplayed({
-				pageid: pg.id
+				pageId: pg.id
 			})
 	},
 	undo: function(){
