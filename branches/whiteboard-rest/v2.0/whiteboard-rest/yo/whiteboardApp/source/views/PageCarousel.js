@@ -41,8 +41,8 @@ enyo.kind({
 				this.createComponent({
 					name: "container" + e,
 					kind: "blanc.PageView",
-					pageno: e + 1,
-					docid: this.docid
+					pageNo: e + 1,
+					docId: this.docId
 				})
 			}
 			this.$["container" + e].render();
@@ -71,11 +71,11 @@ enyo.kind({
 	addPage: function() {
 
 	},
-	jumpTo: function(pageno) {
-		if (this.getIndex() != pageno) {
+	jumpTo: function(pageNo) {
+		if (this.getIndex() != pageNo) {
 			var t = this.getAnimate();
 			this.setAnimate(false);
-			this.setIndex(pageno);
+			this.setIndex(pageNo);
 			this.setAnimate(t);
 			this.signalApperance();
 
@@ -119,8 +119,9 @@ enyo.kind({
 		this.loadNearby();
 		var ind = this.getIndex();
 		this.pages && ind  >=0 && this.pages.length > ind && this.doPageChanged({
-			pageid : this.pages[ind].id,
-			pageno : ind + 1,
+			pageId : this.pages[ind].id,
+			docId: this.docId,
+			pageNo : ind + 1,
 			npages : this.pages.length
 		})
 	},

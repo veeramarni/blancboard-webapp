@@ -3,8 +3,8 @@ enyo.kind({
 	kind: "FittableRows",
 	// ...........................
 	// PUBLIC PROPERTIES
-	pageno: 0,
-	docid: null,
+	pageNo: 0,
+	docId: null,
 	// ...........................
 	// PROTECTED PROPERTIES
 	doc: null,
@@ -32,7 +32,9 @@ enyo.kind({
 		name: "contentholder",
 		draggable: false,
 		components: [{}, {
-
+			name: "download",
+			kind: "blanc.FileDownload",
+			onDownloaded: "displayFile"
 		}, {
 			name: "filegallery",
 			kind: "blanc.FileGallery"
@@ -44,28 +46,33 @@ enyo.kind({
 		this.inherited(arguments);
 		var persist = blanc.Session.getPersistenceManager(),
 			that = this;
-		persist.getDocumentById(this.docid, function(doc) {
+		persist.getDocumentById(this.docId, function(doc) {
 			that.doc = doc;
-			that.$.title.setContent(doc.title);
+			that.$.title.setContent(doc.title || doc.fileName);
+			that.$.download.set("doc", that.doc);
 			that.$.filegallery.set("doc", that.doc);
-			that.displayFile();
+			that.doc.cached ? that.displayFile() : that.downloadFile();
 		}, function(err) {
 			logError(err);
 		})
 	},
 	displayFile: function() {
-		if (!this.pageno)
-			this.pageno = 1;
-		this.$.filegallery.init(this.pageno);
+		if (!this.pageNo || this.pageNo < 1)
+			this.pageNo = this.doc.currentPageNo || 1;
+		this.$.filegallery.init(this.pageNo);
 		this.$.contentholder.setIndex(2);
 	},
 	updatePage: function(sender, event){
-		this.$.pageOfPages.setContent(event.pageno + "/" + event.npages);
+		this.$.pageOfPages.setContent(event.pageNo + "/" + event.npages);
+	},
+	downloadFile: function(){
+		this.$.contentholder.setIndex(1);
+		this.$.download.download();
 	},
 	// ...........................
 	// PUBLIC METHODS
-	showPage: function(pageno) {
-		this.$.filegallery.showPage(pageno);
+	showPage: function(pageNo) {
+		this.$.filegallery.showPage(pageNo);
 	},
 	saveCurrentPageNo: function() {
 		if (this.doc && this.doc.cached) {

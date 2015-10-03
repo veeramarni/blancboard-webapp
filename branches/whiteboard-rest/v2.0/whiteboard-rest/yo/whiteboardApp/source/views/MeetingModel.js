@@ -15,30 +15,30 @@ enyo.kind({
 		this.meetingAssets = {};
 		this.meetingPages = {};
 	},
-	getPage: function(pageid, success, error){
-		var pg = this.getMeetingPages()[pageid];
+	getPage: function(pageId, success, error){
+		var pg = this.getMeetingPages()[pageId];
 		if(pg){
 			success(pg);
 		} else {
 			var that = this;
-			blanc.Session.getConference().getPage(pageid, function(p){
-				that.getMeetingPages()[pageid] = p;
+			blanc.Session.getConference().getPage(pageId, function(p){
+				that.getMeetingPages()[pageId] = p;
 				success(p);
 			}, error)
 		}
 	},
-	getAsset: function(assetid, success, error){
-		var asset = this.getMeetingAssets()[assetid];
+	getAsset: function(assetId, success, error){
+		var asset = this.getMeetingAssets()[assetId];
 		if(asset){
 			success(asset);
 		} else {
 			var that = this;
-			blanc.Session.getPersistenceManager().getDocumentById(assetid, function(a){
-				that.getMeetingPages()[assetid] = a;
+			blanc.Session.getPersistenceManager().getDocumentById(assetId, function(a){
+				that.getMeetingPages()[assetId] = a;
 				success(a);
 			}, function(){
-				blanc.Session.getConference().getAsset(assetid, function(a){
-					that.getMeetingPages()[assetid] = a;
+				blanc.Session.getConference().getAsset(assetId, function(a){
+					that.getMeetingPages()[assetId] = a;
 					success(a);
 				})
 			})

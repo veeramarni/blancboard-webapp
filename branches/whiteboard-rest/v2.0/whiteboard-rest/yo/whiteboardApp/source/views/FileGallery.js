@@ -34,21 +34,21 @@ enyo.kind({
 
 	// ...........................
 	// PUBLIC METHODS
-	init: function(pageno) {
+	init: function(pageNo) {
 		var that = this,
 			persist = blanc.Session.getPersistenceManager();
 		persist.getPagesForDocument(this.doc.id, function(pages) {
-			var i = pageno ? pageno : 1;
+			var i = pageNo ? pageNo : 1;
 			that.$.carousel.set("docId", that.doc.id);
 			that.$.carousel.set("pages", pages);
 			that.$.carousel.setIndex(i - 1);
 			that.$.carousel.render();
 		}, function() {
-			logError("Failed to get the document with id :" + doc.id);
+			logError("Failed to get the document with id :" + that.doc.id);
 		})
 	},
-	showPage: function(pageno) {
-		this.$.carousel.jumpTo(pageno - 1);
+	showPage: function(pageNo) {
+		this.$.carousel.jumpTo(pageNo - 1);
 	},
 	prev: function() {
 		this.$.carousel.previous();

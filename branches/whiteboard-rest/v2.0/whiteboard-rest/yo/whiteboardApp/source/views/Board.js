@@ -15,11 +15,13 @@ enyo.kind({
 	},
 	events: {
 		onUndoRedoStateChanged: "",
-		onClearStateChanged: ""
+		onClearStateChanged: "",
+		onThumbnailUpdated: ""
 	},
 	// ...........................
 	// PRIVATE PROPERTIES
 	elements: null,
+	thumbnailUpdateTimer: null,
 	// ...........................
 	// PUBLIC PROPERTIES
 	paper: null,
@@ -109,9 +111,9 @@ enyo.kind({
 	getElements: function() {
 		return blanc.Session.getDrawEngine().getAllElements();
 	},
-	boardAction: function(board){
+	boardAction: function(board) {
 		var el = board.element;
-		switch(board.action){
+		switch (board.action) {
 			case BoardAction.CREATE:
 			case BoardAction.CLONE:
 				blanc.Session.getDrawEngine().createElement(el.properties, el.type, el.orderNo, false, true);
@@ -122,7 +124,7 @@ enyo.kind({
 			case BoardAction.REMOVE:
 				blanc.Session.getDrawEngine().removeElement(el.properties, false, true);
 				break;
-			case BoardAction.TOFRONT: 
+			case BoardAction.TOFRONT:
 				blanc.Session.getDrawEngine().bringFrontElement(el.properties.uuid, el.properties.orderNo, false, true);
 				break;
 			case BoardAction.TOBACK:
@@ -158,12 +160,13 @@ enyo.kind({
 			this.elements = null;
 		}
 	},
-	saveElements: function(sender, event) {
+	saveElements: function(event){
 		if (this.paper.isDirty) {
 			var that = this;
-			blanc.Session.getPersistenceManager().storeElements(blanc.Session.getDrawEngine().wbElementsToArrayElements(this.paper.wbElements), this.page.id, function(){
-			that.paper.isDirty = false;
-			enyo.isFunction(event) && event();
+			this.triggerThumbnailUpdate();
+			blanc.Session.getPersistenceManager().storeElements(blanc.Session.getDrawEngine().wbElementsToArrayElements(this.paper.wbElements), this.page.id, function() {
+				that.paper.isDirty = false;
+				enyo.isFunction(event) && event();
 			});
 		} else {
 			enyo.isFunction(event) && event();
@@ -174,8 +177,40 @@ enyo.kind({
 		this.visible = false;
 		this.saveElements();
 		blanc.Session.getDrawEngine().removeTracker(this.paper);
-	}
+	},
+	triggerThumbnailUpdate: function() {
+		if (!this.page.previewId) {
+			var that = this;
+			this.thumbnailUpdateTimer && clearTimeout(this.thumbnailUpdateTimer)
+			this.thumbnailUpdateTimer = setTimeout(function() {
+                that.updateThumbnail()
+            }, 300)
+		}
+	},
+	updateThumbnail: function() {
+		var persist = blanc.Session.getPersistenceManager(),
+			rawSvgData = CryptoJS.enc.Utf8.parse(this.paper.toSVG()),
+			imgData = "data:image/svg+xml;base64," + CryptoJS.enc.Base64.stringify(rawSvgData),
+			that = this,
+			success = function(pg, img) {
+				persist.storeBlob(pg.assetId, pg.thumbId, img, function() {
+					that.doThumbnailUpdated({
+						id: pg.id,
+						docId: pg.assetId,
+						pageNo: pg.pageNo,
+						data: img
+					})
+				}, function() {
+					logError("Failed to store svg image");
+				})
 
+			};
+		this.page.thumbId ? success(this.page, imgData) : (this.page.thumbId = bjse.util.randomUUID(), persist.updatePage(this.page, function(pg) {
+			success(pg, imgData);
+		}, function(err) {
+			logError("Unable to update page due to " + err);
+		}));
+	}
 });
 
 enyo.kind({

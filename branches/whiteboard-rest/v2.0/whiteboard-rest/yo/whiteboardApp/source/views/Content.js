@@ -17,32 +17,37 @@ enyo.kind({
 	}],
 	// ...........................
 	// PUBLIC METHODS
-	showFile: function(docid, pageno, n) {
+	showFile: function(docId, pageNo, n) {
 		var pn = this.getPanels();
 		if (pn && pn.length > 0) {
 			var o = pn[0];
-			if (o.getName() === "fileView" && o.docid === docid && !n) {
-				return o.showPage(pageno);
+			if (o.getName() === "fileView" && o.docId === docId && !n) {
+				o.showPage(pageNo);
+				return void 0;
 			}
-			o instanceof blanc.FileView && o.saveCurrentPageNo(), o.destroy();
+			o instanceof blanc.FileView && o.saveCurrentPageNo();
+			o.destroy();
 		}
 		this.addPanel({
 			name: "fileView",
 			kind: "blanc.FileView",
-			docid: docid,
-			pageno: pageno
+			docId: docId,
+			pageNo: pageNo
 		})
+	},
+	showPage: function(pageNo){
+		this.$.fileView && this.$.fileView.showPage(pageNo);
 	},
 	restoreView: function(sender, event){
 		var that = this,
-			pgid = event.pageid;
+			pgid = event.pageId;
 		if(pgid){
 			var per = blanc.Session.getPersistenceManager();
 			if(blanc.Session.isConferenceActive()){
 
 			} else {
 				per.getPageById(pgid, function(pg){
-					that.showFile(pg.assetid, pg.pageNo);
+					that.showFile(pg.assetId, pg.pageNo);
 				}, function(){})
 			}
 		}

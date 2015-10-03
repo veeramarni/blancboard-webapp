@@ -6,11 +6,14 @@ enyo.kind({
 	},
 	handlers: {
 		onPageChanged: "pageChanged",
+		onPageCreated: "pageCreated",
 		onPageRendered: "pageRendered",
+		onPageSelected: "pageSelected",
 		onUndoRedoStateChanged: "undoRedoStateChanged",
 		onClearStateChanged: "clearStateChanged",
 		onFileCreated: "fileCreated",
 		onFileRemoveClicked: "fileRemovedClicked",
+		onThumbnailUpdated: "thumbnailUpdated",
 		onConferenceStarted: "conferenceStarted",
 		onConferenceEnded: "conferenceEnded"
 	},
@@ -35,24 +38,30 @@ enyo.kind({
 		this.menuModel.pageChanged(sender, event);
 		this.updateMenu();
 		var currsess = {
-			pageid: event.pageid
+			pageId: event.pageId
 		}
 		blanc.Session.setCurrentSessionDetails(currsess);
 		this.waterfallDown("onUpdatePage", event);
 		return true;
 	},
+	pageCreated: function(sender, event){
+		this.menuModel.pageCreated(sender, event);
+		this.updateMenu();
+		this.waterfallDown("onPageCreated", event);
+		return true;
+	},
 	pageRendered: function(sender, event){
 		var meetingModel = this.meetingModel;
-		if(blanc.Session.isConferenceActive() && !meetingModel.getUploadHistory()[event.pageid]){
-			meetingModel.getUploadHistory()[event.pageid] = true;
+		if(blanc.Session.isConferenceActive() && !meetingModel.getUploadHistory()[event.pageId]){
+			meetingModel.getUploadHistory()[event.pageId] = true;
 			var pm = blanc.Session.getPersistenceManager(), 
 				err = function(e){
-					meetingModel.getUploadHistory()[event.pageid] = false;
+					meetingModel.getUploadHistory()[event.pageId] = false;
 					logError("Failed to upload page: " + e);
 				}
-			pm.getPageById(event.pageid, function(pg){
+			pm.getPageById(event.pageId, function(pg){
 				// need to set the page title by calling the document
-				pm.getDocumentById(pg.assetid, function(doc){
+				pm.getDocumentById(pg.assetId, function(doc){
 					pg.title = doc.title;
 					pm.getElementsByPageId(pg.id, function(els){
 						blanc.Session.getMeetingSession().sendPage(pg, els, function(){}, err);
@@ -159,7 +168,7 @@ enyo.kind({
 			event.currentView && this.clearView();
 			this.waterfallDown("onFileDeleted", event);
 		});
-		blanc.Session.getPersistenceManager().deleteDocument(event.docid, function(){
+		blanc.Session.getSyncManager().deleteDocument(event.docId, function(){
 			callbackFunction();
 		}, function(err){
 			callbackFunction();
@@ -170,6 +179,9 @@ enyo.kind({
 	canceldFileDeletion: function(sender, event) {
 		this.waterfallDown("onFileDeletionCanceled");
 	},
+    thumbnailUpdated: function(sender, event){
+    	this.waterfallDown("onThumbnailUpdated", event);
+    },
 	// ...........................
 	// Overwritten METHODS
 	updateMenu: function() {

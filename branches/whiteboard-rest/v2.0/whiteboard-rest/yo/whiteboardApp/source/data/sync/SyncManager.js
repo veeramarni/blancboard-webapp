@@ -50,8 +50,12 @@ enyo.kind({
 			}, error)
 		}, error)
 	},
-	deleteDocument: function(docid, success, error){
-
+	deleteDocument: function(docId, success, error){
+		blanc.Session.getPersistenceManager().getDocumentById(docId, function(doc){
+			doc.mimeType == BLANC_MIME_TYPE ? blanc.Session.getPersistenceManager().deleteDocument(docId, success, error): blanc.Session.getAssetManager().deleteAsset(docId, function(){
+				blanc.Session.getPersistenceManager().deleteDocument(docId, success, error);
+			}, error);
+		}, error)
 	},
 	updateDocument: function(doc, success, error){
 		blanc.Session.getAssetManager().updateAsset(doc.id, doc, function(asset){

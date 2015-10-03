@@ -256,7 +256,10 @@ enyo.kind({
         this.enableDrawing();
         this.enableNavigation();
         this.enableContentOperations();
-        this.buttons.leftArrow.state = event.pageno > 1 ? ButtonState.ENABLED : ButtonState.DISABLED;
-        this.buttons.rightArrow.state = event.pageno < event.npages ? ButtonState.ENABLED : ButtonState.DISABLED;
+        this.buttons.leftArrow.state = event.pageNo > 1 ? ButtonState.ENABLED : ButtonState.DISABLED;
+        this.buttons.rightArrow.state = event.pageNo < event.npages ? ButtonState.ENABLED : ButtonState.DISABLED;
+    },
+    pageCreated: function(sender, event){
+        event.pageNo === event.npages && (this.buttons.rightArrow.state = ButtonState.ENABLED);
     }
 })

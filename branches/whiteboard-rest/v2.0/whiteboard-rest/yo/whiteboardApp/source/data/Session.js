@@ -38,7 +38,7 @@ enyo.kind({
         getDevice: function() {
             return new bjse.api.devices.Device({
                 id: blanc.Session.getDeviceId(),
-                ownerid: this.getUserId(),
+                ownerId: this.getUserId(),
                 platformType: "WEB",
                 platformVersion: 2,
                 model: blanc.Session.guessModel()
@@ -136,8 +136,8 @@ enyo.kind({
             this.getRuntime().login(params, this.APP_ID, this.APP_SECRET, success, error);
         },
         getDeviceId: function() {
-            var e = localStorage.getItem("blanc_deviceid");
-            return e || (e = bjse.util.randomUUID(), localStorage.setItem("blanc_deviceid", e)), e
+            var e = localStorage.getItem("blanc_deviceId");
+            return e || (e = bjse.util.randomUUID(), localStorage.setItem("blanc_deviceId", e)), e
         },
         setConference: function(conference) {
             this.conferenceSession = conference;
@@ -156,10 +156,10 @@ enyo.kind({
 
         },
         getUserId: function() {
-            return localStorage.getItem("blanc_userid");
+            return localStorage.getItem("blanc_userId");
         },
         setUserId: function(e) {
-            localStorage.setItem("blanc_userid", e);
+            localStorage.setItem("blanc_userId", e);
         },
         setCurrentSessionDetails: function(session) {
             var ses = this.getCurrentSessionDetails();
@@ -168,7 +168,7 @@ enyo.kind({
             localStorage.setItem("current_session", JSON.stringify(session));
         },
         clearUserData: function() {
-            localStorage.removeItem("blanc_userid");
+            localStorage.removeItem("blanc_userId");
         },
         getCurrentSessionDetails: function() {
             return JSON.parse(localStorage.getItem("current_session"));

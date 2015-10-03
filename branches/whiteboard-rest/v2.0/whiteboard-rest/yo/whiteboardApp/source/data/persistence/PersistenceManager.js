@@ -9,11 +9,12 @@ enyo.kind({
 		newDoc.id = bjse.util.randomUUID();
 		newDoc.title = name;
 		newDoc.type = "File";
-		newDoc.ownerid = blanc.Session.getUserId();
+		newDoc.ownerId = blanc.Session.getUserId();
 		newDoc.shared = false;
 		newDoc.cached = true;
+		newDoc.state = LifecycleState.READY,
 		newDoc.timeCreated = dt;
-		newDoc.contentType = "application/blanc-note";
+		newDoc.mimeType = BLANC_MIME_TYPE;
 		this.storeDocument(newDoc, function(doc) {
 			for (var i = 0; i < 3; i++) {
 				that.createEmptyPage(doc.id, i + 1, function() {
@@ -26,11 +27,11 @@ enyo.kind({
 			error();
 		})
 	},
-	createEmptyPage: function(id, pageno, success, error) {
+	createEmptyPage: function(id, pageNo, success, error) {
 		var page = new bjse.api.board.Page;
 		page.id = bjse.util.randomUUID();
-		page.assetid = id;
-		page.pageNo = pageno;
+		page.assetId = id;
+		page.pageNo = pageNo;
 		page.height = 768;
 		page.width = 1024;
 		id == 1 && (page.thumbid = "thumb_" + id);
