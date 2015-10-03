@@ -20,6 +20,9 @@ var logIncoming = function(data) {
     logError = function(msg) {
         console.log(msg);
     },
+    logWarn = function(msg) {
+        console.log(msg);
+    },
     logInfo = function(msg) {
         console.info(msg);
     };

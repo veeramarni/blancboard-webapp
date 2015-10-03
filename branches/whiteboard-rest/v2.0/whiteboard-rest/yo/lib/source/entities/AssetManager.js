@@ -27,19 +27,21 @@ var AssetType = {
 bjse.api.assets.AssetType = AssetType;
 bjse.api.assets.Asset = function(asset) {
 	this.id = "";
-	this.type = "";
+	this.type = AssetType.ANY;
 	this.title = "";
 	this.tags = "";
 	this.notes = "";
 	this.mimeType = "";
 	this.contentLength = 0;
 	this.fileName = "";
+	this.fileSize = "";
 	this.fileExtension = "";
 	this.timeCreated = null;
 	this.timeUpdated = null;
 	this.state = bjse.api.assets.LifecycleState.ANY;
 	this.thumbUrl = "";
 	this.contentUrl = "";
+	this.contentId = "";
 	this.previewUrl = "";
 	this.ownerId = "";
 	this.shared = false;
@@ -67,7 +69,9 @@ var IMAGE_FILE_TYPES = {
 	"image/png": "png",
 	"image/svg+xml": "svg"
 };
+var BLANC_MIME_TYPE = "application/blanc-note";
 var DOCUMENT_FILE_TYPES = {
+	BLANC_MIME_TYPE: "svg",
 	"application/msword": "doc",
 	"application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
 	"application/msword": "dot",
@@ -90,10 +94,10 @@ var DOCUMENT_FILE_TYPES = {
 	"application/pdf": "pdf"
 };
 bjse.api.assets.uploadproperties = function(props) {
-	this.url = "https://test.blancboard.com.s3.amazonaws.com";
+	this.url = "http://test.blancboard.com.s3.amazonaws.com";
 	this.headers = null,
-	this.maxFileSize = MAX_FILE_SIZE;
-	this.acceptFileTypes = Object.keys($.extend(DOCUMENT_FILE_TYPES,IMAGE_FILE_TYPES)).join(',');
+		this.maxFileSize = MAX_FILE_SIZE;
+	this.acceptFileTypes = Object.keys($.extend(DOCUMENT_FILE_TYPES, IMAGE_FILE_TYPES)).join(',');
 	this.imageFileTypes = Object.keys(IMAGE_FILE_TYPES).join(',');
 	this.thumbnailWidth = 100;
 	this.thumbnailHeight = 100;
@@ -142,17 +146,17 @@ bjse.api.assets.AssetManager.prototype.createAsset = function(data, success, err
 		success(asset);
 	}, error)
 };
-bjse.api.assets.AssetManager.prototype.deleteAsset = function(assetid, success, error) {
-	var url = bjse.util.format("{$apiurl}/assets/{$assetid}", {
+bjse.api.assets.AssetManager.prototype.deleteAsset = function(assetId, success, error) {
+	var url = bjse.util.format("{$apiurl}/assets/{$assetId}", {
 		apiurl: this.session.runtime.serverUrl,
-		assetid: assetid
+		assetId: assetId
 	});
 	this.session.getHttpClient().delAuth(url, "", success, error);
 };
-bjse.api.assets.AssetManager.prototype.updateAsset = function(assetid, data, success, error) {
-	var url = bjse.util.format("{$apiurl}/assets/{$assetid}", {
+bjse.api.assets.AssetManager.prototype.updateAsset = function(assetId, data, success, error) {
+	var url = bjse.util.format("{$apiurl}/assets/{$assetId}", {
 		apiurl: this.session.runtime.serverUrl,
-		assetid: assetid
+		assetId: assetId
 	});
 	this.session.getHttpClient().postAuth(url, data, function(assetApi) {
 		var asset = new bjse.api.assets.Asset(assetApi);
@@ -166,7 +170,7 @@ bjse.api.assets.AssetManager.prototype.getAssets = function(data, success, error
 	this.session.getHttpClient().postAuth(url, data, function(response) {
 		var assets = [];
 		if (bjse.util.isArray(response.assets)) {
-			for (var i = 0; i < response.length; i++) {
+			for (var i = 0; i < response.assets.length; i++) {
 				assets.push(response.assets[i])
 			}
 		} else {
@@ -175,28 +179,59 @@ bjse.api.assets.AssetManager.prototype.getAssets = function(data, success, error
 		success(assets, response.timestamp);
 	}, error)
 }
-bjse.api.assets.AssetManager.prototype.getAsset = function(assetid, success, error) {
-	var url = bjse.util.format("{$apiurl}/assets/{$assetid}", {
+bjse.api.assets.AssetManager.prototype.getAsset = function(assetId, success, error) {
+	var url = bjse.util.format("{$apiurl}/assets/{$assetId}", {
 		apiurl: this.session.runtime.serverUrl,
-		assetid: assetid
+		assetId: assetId
 	});
-	this.session.getHttpClient().getAuth(url, assetid, function(assetApi) {
+	this.session.getHttpClient().getAuth(url, assetId, function(assetApi) {
 		var asset = new bjse.api.assets.Asset(assetApi);
 		success(asset);
 	}, error)
 };
-bjse.api.assets.AssetManager.prototype.getPreUploadInfo = function(fileData, success, error) {
-	var url = bjse.util.format("{$apiurl}/assets/preuploadInfo/{$assetid}", {
+bjse.api.assets.AssetManager.prototype.loadPages = function(assetId, success, error) {
+	var url = bjse.util.format("{$apiurl}/assets/pages/{$assetId}", {
 		apiurl: this.session.runtime.serverUrl,
-		assetid: bjse.util.randomUUID()
+		assetId: assetId
 	});
-	this.session.getHttpClient().postAuth(url,fileData, function(t) {
+	this.session.getHttpClient().getAuth(url, assetId, function(pagesApi) {
+		var pages = [];
+		for(var i=0; i < pagesApi.length; i++){
+			pages.push(pagesApi[i])
+		}
+		success(pages);
+	}, error)
+};
+bjse.api.assets.AssetManager.prototype.getPreUploadInfo = function(fileData, success, error) {
+	var url = bjse.util.format("{$apiurl}/assets/preuploadInfo/{$contentId}", {
+		apiurl: this.session.runtime.serverUrl,
+		contentId: bjse.util.randomUUID()
+	});
+	this.session.getHttpClient().postAuth(url, fileData, function(t) {
 		success(t);
 	}, error)
-}
+};
+bjse.api.assets.AssetManager.prototype.getPostUploadInfo = function(asset, success, error) {
+	var url = bjse.util.format("{$apiurl}/assets/s3/{$contentId}", {
+		apiurl: this.session.runtime.serverUrl,
+		contentId: asset.contentId
+	});
+	this.session.getHttpClient().postAuth(url, asset, function(t) {
+		success(t);
+	}, error)
+};
 
 bjse.api.assets.AssetManager.prototype.uploadFile = function(node, props, success, error) {
 	var that = this,
+		assetbuilder = {
+			asset: null,
+			get getAsset() {
+				return this.asset;
+			},
+			set setAsset(asset) {
+				this.asset = asset
+			}
+		},
 		myDropzone = new Dropzone(node, {
 			url: props.url,
 			acceptedMimeTypes: props.acceptFileTypes,
@@ -206,14 +241,21 @@ bjse.api.assets.AssetManager.prototype.uploadFile = function(node, props, succes
 			clickable: props.clickable,
 			dictDefaultMessage: props.dictDefaultMessage,
 			accept: function(file, done) {
-				var fileData = new bjse.api.assets.UploadRequest({
-					"fileSize": file.size,
-					"mimeType": file.type,
-					"fileName": file.name
-				});
+				var assetReq = {
+						"fileSize": file.size,
+						"mimeType": file.type,
+						"fileName": file.name
+					},
+					fileData = new bjse.api.assets.UploadRequest(assetReq);
+				assetbuilder.setAsset = new bjse.api.assets.Asset(assetReq)
 				that.getPreUploadInfo(fileData, function(res) {
 					file.custom_status = 'read';
 					file.postData = res.params;
+					assetbuilder.setAsset = $.extend(assetbuilder.getAsset, {
+						contentId: res.contentId,
+						type: AssetType.FILE,
+						fileExtension: res.fileExtension
+					});
 					done();
 				}, function(res) {
 					file.custom_status = "rejected";
@@ -233,14 +275,22 @@ bjse.api.assets.AssetManager.prototype.uploadFile = function(node, props, succes
 			formData.append(k, v);
 		})
 	});
-	// this.getUploadInfo(assetid, function(uploadInfo){
-	// 	for(var fd = new FormData, i = 0; i < uploadInfo.param.length; i++){
-	// 		var p = uploadInfo.param[i];
-	// 		fd.append(p.name, p.value);
-	// 	}
-	// 	fd.append("file", file);
-
-	// })
+	myDropzone.on("complete", function() {
+		}, function() {
+	});
+	myDropzone.on("error", function() {
+		}, function() {
+	});
+	myDropzone.on("success", function() {
+		assetbuilder.setAsset = $.extend(assetbuilder.getAsset, {
+			state: LifecycleState.CREATED
+		})
+		that.getPostUploadInfo(assetbuilder.getAsset, function(res) {
+			success(res);
+		}, function(err) {
+			error(err);
+		})
+	});
 }
 bjse.api.assets.AssetManager.prototype.getDownloadUrl = function() {
 

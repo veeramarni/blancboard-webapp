@@ -15,27 +15,27 @@ bjse.api.users.User = function(user){
 	this.avatarUrl = "";
 	this.about = "";
 	this.accountType = AccountType.FREE;
-	this.accountid = "";
+	this.accountId = "";
 	this.admin = false;
 	bjse.util.mixin(this, user);
 };
 bjse.api.users.UserDirectory = function(session){
 	this.session = session;
 };
-bjse.api.users.UserDirectory.prototype.getUser = function(userid, success, error){
-	var url = bjse.util.format("{$apiurl}/users/{$userid}",{
+bjse.api.users.UserDirectory.prototype.getUser = function(userId, success, error){
+	var url = bjse.util.format("{$apiurl}/users/{$userId}",{
 		apiurl: this.session.runtime.serverUrl,
-		userid: userid
+		userId: userId
 	});
 	this.session.getHttpClient().getAuth(url, '', function(response){
 		var user = new bjse.api.users.User(response);
 		success(user);
 	}, error);
 };
-bjse.api.users.UserDirectory.prototype.updateUser = function(userid, updatedUser, success, error){
-	var url = bjse.util.format("{$apiurl}/users/{$userid}", {
+bjse.api.users.UserDirectory.prototype.updateUser = function(userId, updatedUser, success, error){
+	var url = bjse.util.format("{$apiurl}/users/{$userId}", {
 		apiurl: this.session.runtime.serverUrl,
-		userid: userid
+		userId: userId
 		}),
 		that = this;
 	this.session.getHttpClient().postAuth(url,updatedUser, function(response){
@@ -63,10 +63,10 @@ bjse.api.users.UserDirectory.prototype.getUsers = function(success, error){
 		success(users);
 	}, error)
 };
-bjse.api.users.UserDirectory.prototype.deleteUser = function(userid, success, error) {
-	var url = bjse.util.format("{$apiurl}/users/{$userid}", {
+bjse.api.users.UserDirectory.prototype.deleteUser = function(userId, success, error) {
+	var url = bjse.util.format("{$apiurl}/users/{$userId}", {
 		apiurl: this.session.runtime.serverUrl,
-		userid: userid
+		userId: userId
 	});
 	this.session.getHttpClient().del(url, {}, success, error);
 };

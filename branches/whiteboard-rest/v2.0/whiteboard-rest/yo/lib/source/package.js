@@ -14,5 +14,6 @@ enyo.depends(
 	"Runtime.js",
 	"Util.js",
 	"Analytics.js",
-	"log.js"
+	"log.js",
+	"atmosphere-client.js"
 )
