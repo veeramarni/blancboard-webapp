@@ -49,7 +49,7 @@ enyo.kind({
         		? "email" != this.getType() || this.isValidEmail() 
             		? "email_username" != this.getType() || this.isValidEmail() || this.isValidUsername() 
                 		? "username" != this.getType() || this.isValidUsername() 
-                    		? "roomid" != this.getType() || this.isValidUsername() 
+                    		? "roomname" != this.getType() || this.isValidUsername() 
                         		? "displayName" != this.getType() || this.isValidDisplayName()
                             		? "phone" != this.getType() || this.isValidPhone() 
                                 		? true 

@@ -33,7 +33,9 @@
     "jquery-file-upload": "~9.10.7",
     "dropzone": "~4.0.1",
     "lodash": "~3.10.1",
-    "atmosphere-javascript": "*"
+    "atmosphere-javascript": "*",
+    "blackbird": "~0.0.3",
+    "blackbirdjs": "https://github.com/veeramarni/blackbirdjs.git"
   },
   "overrides": {
     "FlexSlider": {

@@ -8,7 +8,9 @@ enyo.kind({
 		onPageChanged: "pageChanged",
 		onPageCreated: "pageCreated",
 		onPageRendered: "pageRendered",
+		onPageDisplayed: "pageDisplayed",
 		onPageSelected: "pageSelected",
+		onDrawAction: "drawAction",
 		onUndoRedoStateChanged: "undoRedoStateChanged",
 		onClearStateChanged: "clearStateChanged",
 		onFileCreated: "fileCreated",
@@ -37,34 +39,39 @@ enyo.kind({
 	pageChanged: function(sender, event) {
 		this.menuModel.pageChanged(sender, event);
 		this.updateMenu();
-		var currsess = {
-			pageId: event.pageId
+		var urn = new bjse.api.URN({
+			scheme: "page",
+			location: event.pageId
+		})
+		if (urn.equals(blanc.Session.getCurrentUrn())) {
+			return true;
+		} else {
+			blanc.Session.setCurrentUrn(urn);
 		}
-		blanc.Session.setCurrentSessionDetails(currsess);
 		this.waterfallDown("onUpdatePage", event);
 		return true;
 	},
-	pageCreated: function(sender, event){
+	pageCreated: function(sender, event) {
 		this.menuModel.pageCreated(sender, event);
 		this.updateMenu();
 		this.waterfallDown("onPageCreated", event);
 		return true;
 	},
-	pageRendered: function(sender, event){
+	pageRendered: function(sender, event) {
 		var meetingModel = this.meetingModel;
-		if(blanc.Session.isConferenceActive() && !meetingModel.getUploadHistory()[event.pageId]){
-			meetingModel.getUploadHistory()[event.pageId] = true;
-			var pm = blanc.Session.getPersistenceManager(), 
-				err = function(e){
-					meetingModel.getUploadHistory()[event.pageId] = false;
+		if (blanc.Session.isConferenceActive() && !meetingModel.get("uploadHistory")[event.pageId]) {
+			meetingModel.get("uploadHistory")[event.pageId] = true;
+			var pm = blanc.Session.getPersistenceManager(),
+				err = function(e) {
+					meetingModel.get("uploadHistory")[event.pageId] = false;
 					logError("Failed to upload page: " + e);
 				}
-			pm.getPageById(event.pageId, function(pg){
+			pm.getPageById(event.pageId, function(pg) {
 				// need to set the page title by calling the document
-				pm.getDocumentById(pg.assetId, function(doc){
+				pm.getDocumentById(pg.assetId, function(doc) {
 					pg.title = doc.title;
-					pm.getElementsByPageId(pg.id, function(els){
-						blanc.Session.getMeetingSession().sendPage(pg, els, function(){}, err);
+					pm.getElementsByPageId(pg.id, function(els) {
+   						blanc.Session.getConferenceSession().sendPage(pg, els, function() {}, err);
 					}, err);
 				}, err);
 			}, err);
@@ -76,7 +83,7 @@ enyo.kind({
 		}
 		this.updateMenu();
 		return true;
-	},
+	},  
 	clearStateChanged: function(sender, event) {
 		this.menuModel.clearStateChanged(event);
 		this.updateMenu();
@@ -85,25 +92,48 @@ enyo.kind({
 	clearView: function(sender, event) {
 		this.waterfallDown("onClearContent", event);
 	},
-	restoreSession: function(){
-		if(blanc.Session.isConferenceActive()){
-
+	restoreSession: function() {
+		var joinId = this.joinId();
+		if (joinId) {
+			if (blanc.Session.isConferenceActive()) {
+				var confSess = blanc.Session.getConferenceSession();
+				this.meetingStarted(this, {
+					conferenceSession: confSess
+				});
+				confSess.conference.currentUrn && this.waterfallDown("onRestoreView", {
+					urn: blanc.api.URN.parse(confSess.conference.currentUrn)
+				})
+			} else {
+				var that = this;
+				blanc.Session.getUserInfo(function(user) {
+					blanc.Session.getConferenceManager().joinConference(joinId, {
+						firstName: user.firstName,
+						lastName: user.lastName,
+						email: user.email
+					}, function(session){
+						that.conferenceStarted(that, {
+							conferenceSession: session,
+							joinId: joinId
+						})
+					}, function(){
+						that.handleJoinConferenceError();
+					})
+				}, function() {}
+				)
+			}
 		} else {
-			var that = this;
-			blanc.Session.getUserInfo(function(t){
-				
-			}, function(){
-				// redirect to the login page
-				
-			})
+			if (blanc.Session.getCurrentUrn()) {
+				this.waterfallDown("onRestoreView", {
+					urn: blanc.Session.getCurrentUrn()
+				})
+			} else {
+				this.waterfallDown("onStartPage");
+			}
 		}
-		if(blanc.Session.getCurrentSessionDetails()){
-			this.waterfallDown("onRestoreView", {
-				page: blanc.Session.getCurrentSessionDetails()
-			})
-		} else {
-			this.waterfallDown("onStartPage");
-		}
+	},
+	joinId: function() {
+		var param = blanc.Session.getUrlParams();
+		return param.joinId || blanc.Session.getSavedJoinId()
 	},
 	// ...........................
 	// PUBLIC METHODS
@@ -117,26 +147,64 @@ enyo.kind({
 		});
 		comp.show();
 	},
-	conferenceStarted: function(sender, event){
-		var conference = event.conference;
-		conference.onBoardAction = enyo.bind(this, this.boardAction);
-		conference.onConferenceEnded = enyo.bind(this, this.conferenceEnded);
-		blanc.Session.setConference(event.conference);
+	conferenceStarted: function(sender, event) {
+		var conferenceSession = event.conferenceSession;
+		conferenceSession.onBoardAction = enyo.bind(this, this.boardAction);
+		conferenceSession.onConferenceEnded = enyo.bind(this, this.conferenceEnded);
+		conferenceSession.onInitialLoad = enyo.bind(this, this.initialLoad);
+		blanc.Session.setConferenceSession(conferenceSession);
+		this.menuModel.processConferenceStarted();
 		this.waterfallDown("onConferenceStarted", {
-			conference: event.conference
+			conferenceSession: conferenceSession
 		})
-		if(event.conference.isPresenter()){
-			var sesdetail = blanc.Session.getCurrentSessionDetails();
+		if (conferenceSession.isPresenter()) {
+			var sesdetail = blanc.Session.getCurrentUrn();
 			// display the current board
 		} else {
 
 		}
 	},
-	conferenceEnded: function(sender, event){
+	conferenceEnded: function(sender, event) {
 
 	},
-	boardAction: function(sender, event){
-		this.waterfallDown("onBoardAction", event);
+	initialLoad: function(data){
+		var urn = data.parameters.currentUrn;
+		if(urn.scheme == "page"){
+			this.meetingModel.loadPage(data.page);
+		} else if(urn.scheme == "asset"){
+			this.meetingModel.loadAsset(data.asset);
+		}
+		this.displayResource(urn);
+	},
+	displayResource: function(urn){
+		"page" === urn.scheme ? this.displayPage(urn) : this.contentDisplayed();
+	},
+	displayPage: function(urn){
+		var that = this;
+		this.meetingModel.getPage(urn.location, function(pg){
+			blanc.Session.isConferenceActive() && that.waterfallDown("onDisplayPage", { page: pg});
+		}, function(){
+			logError("Unable to get Page with id " + urn.location);
+		})
+	},
+	contentDisplayed: function(){
+
+	},
+	pageDisplayed: function(sender, event){
+		this.contentDisplayed();
+		this.menuModel.pageDisplayed(sender, event);
+		this.updateMenu();
+	},
+	boardAction: function(d) {
+		this.waterfallDown("onBoardAction", {data: d});
+	},
+	drawAction: function(sender, event) {
+		if (blanc.Session.isConferenceActive()) {
+			var cSession = blanc.Session.getConferenceSession();
+			cSession.drawAction(event.sendAction, event.pageId, event.assetId, function(e) {
+				logError("Failed to post the draw action " + e.message);
+			});
+		}
 	},
 	paletteHidden: function() {
 		if (this.$.palette) {
@@ -147,6 +215,22 @@ enyo.kind({
 			} else {
 				this.$.palette.destroy();
 			}
+		}
+	},
+	handleJoinConferenceError: function(){
+		var urlParams = blanc.Session.getUrlParams();
+		if(urlParams.joinId){
+			var comp = this.createComponent({
+				kind: "blanc.Alert",
+				onHide: "conferenceEnded",
+				showing: false
+			}, {
+				owner: this
+			});
+			comp.render();
+			comp.showMessage($L("Meeting Error"), $L("This meeting invitation is no longer valid. Please contact your organizer."))
+		} else {
+			this.conferenceEnded();
 		}
 	},
 	fileRemovedClicked: function(sender, event) {
@@ -168,20 +252,20 @@ enyo.kind({
 			event.currentView && this.clearView();
 			this.waterfallDown("onFileDeleted", event);
 		});
-		blanc.Session.getSyncManager().deleteDocument(event.docId, function(){
+		blanc.Session.getSyncManager().deleteDocument(event.docId, function() {
 			callbackFunction();
-		}, function(err){
+		}, function(err) {
 			callbackFunction();
 			logError(err);
 		})
 		return true;
 	},
-	canceldFileDeletion: function(sender, event) {
+	canceledFileDeletion: function(sender, event) {
 		this.waterfallDown("onFileDeletionCanceled");
 	},
-    thumbnailUpdated: function(sender, event){
-    	this.waterfallDown("onThumbnailUpdated", event);
-    },
+	thumbnailUpdated: function(sender, event) {
+		this.waterfallDown("onThumbnailUpdated", event);
+	},
 	// ...........................
 	// Overwritten METHODS
 	updateMenu: function() {

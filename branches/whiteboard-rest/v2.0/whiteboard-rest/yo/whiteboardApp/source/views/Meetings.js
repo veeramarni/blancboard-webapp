@@ -1,7 +1,7 @@
 enyo.kind({
 	name: "blanc.Meetings",
 	events: {
-		onStartedMeeting: "",
+		onConferenceStarted: "",
 		onJoinedMeeting: "",
 		onErrorAlert: ""
 	},
@@ -27,21 +27,21 @@ enyo.kind({
 				}, {
 					classes: "panel-body",
 					components: [{
-						name: "roomidGroup",
+						name: "roomnameGroup",
 						classes: "form-group",
 						style: "margin-bottom: 0px;",
 						components: [{
-							name: "roomid",
-							placeholder: "Enter a meeting room ID",
-							onfocus: "resetRoomID",
+							name: "roomname",
+							placeholder: "Enter a conference room ID",
+							onfocus: "resetRoomName",
 							kind: "enyo.Input",
 							classes: "form-control enyo-selectable",
 							onkeydown: "onEnter"
 						}, {
-							name: "roomidHelp",
+							name: "roomnameHelp",
 							style: "margin-bottom: 0px; text-align: center;",
 							classes: "help-block",
-							content: $L("The meeting room ID must be provided by the meeting organizer.")
+							content: $L("The conference room ID must be provided by the conference organizer.")
 						}]
 					}]
 				}, {
@@ -70,7 +70,7 @@ enyo.kind({
 							content: $L("Room ID"),
 							classes: "field"
 						}, {
-							name: "roomidValue",
+							name: "roomnameValue",
 							classes: "value enyo-selectable",
 							content: ""
 						}]
@@ -82,6 +82,72 @@ enyo.kind({
 							name: "capacityValue",
 							classes: "value enyo-selectable",
 							content: "unlimited"
+						}]
+					}, {
+						name: "audioBlock",
+						showing: true,
+						components: [{
+							attributes: {
+								colspan: 2
+							},
+							style: "padding-left: 40px;",
+							components: [{
+								tag: "label",
+								components: [{
+									name: "audio",
+									style: "margin-left: -10px;",
+									kind: "enyo.Checkbox",
+									checked: false
+								}, {
+									tag: "span",
+									style: "margin-left: 10px;",
+									content: $L("with audio conference")
+								}]
+							}]
+						}]
+					}, {
+						name: "videoBlock",
+						showing: true,
+						components: [{
+							attributes: {
+								colspan: 2
+							},
+							style: "padding-left: 40px;",
+							components: [{
+								tag: "label",
+								components: [{
+									name: "video",
+									style: "margin-left: -10px;",
+									kind: "enyo.Checkbox",
+									checked: false
+								}, {
+									tag: "span",
+									style: "margin-left: 10px;",
+									content: $L("with video conference")
+								}]
+							}]
+						}]
+					}, {
+						name: "allShareBlock",
+						showing: true,
+						components: [{
+							attributes: {
+								colspan: 2
+							},
+							style: "padding-left: 40px;",
+							components: [{
+								tag: "label",
+								components: [{
+									name: "allShare",
+									style: "margin-left: -10px;",
+									kind: "enyo.Checkbox",
+									checked: false
+								}, {
+									tag: "span",
+									style: "margin-left: 10px;",
+									content: $L("all can share")
+								}]
+							}]
 						}]
 					}]
 				}, {
@@ -97,53 +163,58 @@ enyo.kind({
 			}]
 		}]
 	}],
-	init: function(){
-		this.resetRoomID();
+	init: function() {
+		this.resetRoomName();
 		var that = this;
-		blanc.Session.getUserInfo(function(t){
-			that.$.roomidValue.setContent(t.username)
+		blanc.Session.getUserInfo(function(user) {
+			that.$.roomnameValue.setContent(user.publicId)
 		})
 	},
-	joinClicked: function(){
-		var id = this.$.roomid.getValue();
-		if(!id){
-			this.$.roomidGroup.addClass("has-error");
+	joinClicked: function() {
+		var id = this.$.roomname.getValue();
+		if (!id) {
+			this.$.roomnameGroup.addClass("has-error");
 			this.$.joinButton.reset();
 			return false;
 		}
 		this.dismissKeyboard();
 		var that = this;
-		blanc.Session.getUserInfo(function(){
+		blanc.Session.getUserInfo(function() {
 
 		})
 	},
-	resetRoomID: function(){
-		this.$.roomidGroup.removeClass("has-error");
+	resetRoomName: function() {
+		this.$.roomnameGroup.removeClass("has-error");
 	},
-	dismissKeyboard: function(){
-		this.$.roomid.hasNode().blur();
+	dismissKeyboard: function() {
+		this.$.roomname.hasNode().blur();
 	},
-	onEnter: function(sender, event){
-		return 13 === event.keyCode ? (this.$.joinButton.clicked(), this.joinClicked(), true) : false 
+	onEnter: function(sender, event) {
+		return 13 === event.keyCode ? (this.$.joinButton.clicked(), this.joinClicked(), true) : false
 	},
-	startClicked: function(){
+	startClicked: function() {
 		var that = this,
 			uuid = enyo.uuid();
-
-		blanc.Session.getConferenceManager().startMeeting(function(){
-			blanc.Session.getConferenceManager().initAtmosphere();
-		}, function(m){
-			that.$.startButton.reset();
-			that.doStartedMeeting({
-				meeting: m,
-				joinid: "test"
-			})
-		}, function(){
-			that.$.startButton.reset();
-			that.doErrorAlert({
-				message: $L("Failed to start a meeting. Please check the network connection and try again.")
-			})
-		})
-		// collect analytics
+		blanc.Session.getConferenceManager().startConference({
+					allCanShare: this.$.allShare.getChecked(),
+					audioEnabled: this.$.audio.getChecked(),
+					videoEnabled: this.$.video.getChecked(),
+					conferenceType: bjse.api.conference.ConferenceType.INSTANT,
+					organizerPassword: "",
+					participantPassword: ""
+				}, function(session) {
+					that.$.startButton.reset();
+					that.doConferenceStarted({
+						conferenceSession: session,
+						joinId: "test"
+					})
+				},
+				function() {
+					that.$.startButton.reset();
+					that.doErrorAlert({
+						message: $L("Failed to start a conference. Please check the network connection and try again.")
+					})
+				})
+			// collect analytics
 	}
 })

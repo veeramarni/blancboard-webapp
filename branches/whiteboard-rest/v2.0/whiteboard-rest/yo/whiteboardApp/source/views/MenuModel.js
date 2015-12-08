@@ -164,6 +164,12 @@ enyo.kind({
             button && (button.state = ButtonState.DISABLED);
         }
     },
+    contentCleared: function(){
+        this.disableDrawing();
+        this.disableNavigation();
+        this.buttons.fullscreen.state = ButtonState.DISABLED;
+        !blanc.Session.isConferenceActive() || blanc.Session.getConferenceSession().canPresent() ? this.enableContentOperations() : this.disableContentOperations()
+    },
     enableDrawing: function() {
         if (this.buttons.palette.state === ButtonState.DISABLED) {
             this.buttons.palette.state = ButtonState.ENABLED;
@@ -261,5 +267,17 @@ enyo.kind({
     },
     pageCreated: function(sender, event){
         event.pageNo === event.npages && (this.buttons.rightArrow.state = ButtonState.ENABLED);
+    },
+    pageDisplayed: function(sender, event){
+        this.contentCleared();
+        this.buttons.fullscreen.state == blanc.Session.isFullScreenSupported() ? ButtonState.ENABLED : ButtonState.DISABLED;
+        blanc.Session.getConferenceSession().canPresent() ? this.enableDrawing(): this.disableDrawing();
+    },
+    processConferenceStarted: function(){
+        this.buttons.files.state = blanc.Session.getConferenceSession().canPresent() ? ButtonState.ENABLED : ButtonState.DISABLED;
+        this.buttons.leave.state = ButtonState.ENABLED;
+        this.buttons.people.state = ButtonState.ENABLED;
+        this.buttons.settings.state = ButtonState.DISABLED;
+        //audio and video
     }
 })

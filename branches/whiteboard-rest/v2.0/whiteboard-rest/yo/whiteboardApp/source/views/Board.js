@@ -16,7 +16,8 @@ enyo.kind({
 	events: {
 		onUndoRedoStateChanged: "",
 		onClearStateChanged: "",
-		onThumbnailUpdated: ""
+		onThumbnailUpdated: "",
+		onDrawAction: ""
 	},
 	// ...........................
 	// PRIVATE PROPERTIES
@@ -114,30 +115,39 @@ enyo.kind({
 	boardAction: function(board) {
 		var el = board.element;
 		switch (board.action) {
-			case BoardAction.CREATE:
-			case BoardAction.CLONE:
-				blanc.Session.getDrawEngine().createElement(el.properties, el.type, el.orderNo, false, true);
+			case bjse.api.conference.Action.CREATE:
+			case bjse.api.conference.Action.CLONE:
+				blanc.Session.getDrawEngine().createElement(el.properties, el.type, el.properties.orderNo, false, true);
 				break;
-			case BoardAction.UPDATE:
+			case bjse.api.conference.Action.UPDATE:
 				blanc.Session.getDrawEngine().updateElement(el.properties, el.type);
 				break;
-			case BoardAction.REMOVE:
-				blanc.Session.getDrawEngine().removeElement(el.properties, false, true);
+			case bjse.api.conference.Action.REMOVE:
+				blanc.Session.getDrawEngine().removeElement(el.properties.uuid, false, true);
 				break;
-			case BoardAction.TOFRONT:
+			case bjse.api.conference.Action.TOFRONT:
 				blanc.Session.getDrawEngine().bringFrontElement(el.properties.uuid, el.properties.orderNo, false, true);
 				break;
-			case BoardAction.TOBACK:
+			case bjse.api.conference.Action.TOBACK:
 				blanc.Session.getDrawEngine().bringBackElement(el.properties.uuid, el.properties.orderNo, false, true);
 				break;
-			case BoardAction.CLEAR:
+			case bjse.api.conference.Action.CLEAR:
 				blanc.Session.getDrawEngine().clearWhiteboard();
 				break;
 		}
 	},
+	raiseAction: function(event){
+        this.doDrawAction({
+            sendAction: event,
+            pageId: this.page.id,
+            assetId: this.page.assetId
+        });
+        // find better way to commit to the storage
+        //this.saveElements();
+	},
 	didAppear: function() {
 		if (!blanc.Session.isDrawingEnabled()) {
-			var drawOptions = {},
+			var drawOptions = { isBroadcastable: true},
 				that = this;
 			drawOptions.onUndoRedoChanged = enyo.bind(this, function(obj) {
 				that.doUndoRedoStateChanged(obj);
@@ -145,6 +155,9 @@ enyo.kind({
 			drawOptions.onClearPaper = enyo.bind(this, function(obj) {
 				that.doClearStateChanged(obj);
 			});
+			drawOptions.onSend = enyo.bind(this, function(obj){
+				this.raiseAction(obj)
+			})
 			blanc.Session.setDrawEngine(drawOptions);
 		}
 		this.visible = true;
@@ -153,10 +166,12 @@ enyo.kind({
 		blanc.Session.isDrawing() && blanc.Session.getDrawEngine().createTracker();
 		this.setOffset();
 	},
-	restoreElements: function(els) {
-		els = els || this.elements;
+	restoreElements: function(els, broadcast) {
+		if(!els){
+			els = this.elements;
+		}
 		if (els) {
-			blanc.Session.getDrawEngine().restorePaper(this.elements);
+			blanc.Session.getDrawEngine().restorePaper(els, broadcast);
 			this.elements = null;
 		}
 	},

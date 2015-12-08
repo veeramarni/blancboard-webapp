@@ -1,6 +1,6 @@
 enyo.kind({
 	name: "blanc.MeetingView",
-	kind: "FittedRows",
+	kind: "FittableRows",
 	fit: true,
 	handlers: {
 		onUndoClicked: "undo",
@@ -22,28 +22,28 @@ enyo.kind({
 		fit: true,
 		components: [{
 			kind: "Panels",
-			style: "width:100%; height:100%;",
+			style: "width:100%;height:100%;",
 			draggable: false,
 			classes: "file-content",
 			name: "panels",
 			animate: false,
-			component: [{
-				kind: "blanc.MeetingPageView"
+			components: [{
+				kind: "blanc.Page"
 			}, {
-				kind: "blanc.MeetingPageView"
+				kind: "blanc.Page"
 			}]
 		}]
 	}],
 	rendered: function(){
 		this.inherited(arguments);
-		this.page && this.displayPage(this.page);
+		this.page && this.displayPage(this.page);		
 	},
 	pageView: function(){
 		return this.$.panels.getActive();
 	},
 	displayPage: function(pg){
 		var curpn, pn = this.$.panels.getActive();
-		if(pn.getPage() == null || pn.getPage().id != pg.id){
+		if(pn.get("page") == null || pn.get("page").id != pg.id){
 			pn.destroyComponents();
 			var ind = this.$.panels.getIndex(),
 				o = (ind + 1) % 2;
@@ -66,6 +66,6 @@ enyo.kind({
 	},
 	boardAction: function(sender, event){
 		var pv = this.pageView();
-		pv && pv.boardAction(event.action);
+		pv && pv.boardAction(sender, event.data);
 	}
 })

@@ -7,8 +7,8 @@
 enyo.kind({
 	name: "blanc.Application",
 	kind: "enyo.Application",
-	view: "blanc.MainView"	
-	//view: "blanc.PagesList"
+	//view: "blanc.MainView"	
+	view: "blanc.Chat"
 });
 
 enyo.ready(function() {

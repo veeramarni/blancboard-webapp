@@ -1,6 +1,7 @@
 enyo.depends(
 	// for deploying (temporary fix) replace $lib/../ to $lib//
 	"$lib/../jquery/dist/jquery.js",
+	"$lib/../blackbirdjs/blackbird.js",
 	"$lib/../lodash/lodash.js", // for utility
 	"$lib/../raphael/raphael.js",
 	"$lib/../raphael.json/raphael.json.js",
@@ -13,6 +14,7 @@ enyo.depends(
 	"$lib/../atmosphere-javascript/modules/javascript/src/main/webapp/javascript/atmosphere.js",
 	"$lib/../dropzone/dist/dropzone.js",
 	"$lib/../layout",
+	"$lib/../enyo-animated",
 	"$lib/../onyx",
 	"$lib/../../lib",
 	"style",

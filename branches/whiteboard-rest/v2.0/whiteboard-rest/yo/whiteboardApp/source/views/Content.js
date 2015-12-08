@@ -35,24 +35,9 @@ enyo.kind({
 			pageNo: pageNo
 		})
 	},
-	showPage: function(pageNo){
+	showPage: function(pageNo) {
 		this.$.fileView && this.$.fileView.showPage(pageNo);
 	},
-	restoreView: function(sender, event){
-		var that = this,
-			pgid = event.pageId;
-		if(pgid){
-			var per = blanc.Session.getPersistenceManager();
-			if(blanc.Session.isConferenceActive()){
-
-			} else {
-				per.getPageById(pgid, function(pg){
-					that.showFile(pg.assetId, pg.pageNo);
-				}, function(){})
-			}
-		}
-	},
-
 	// Following code for panels
 	getPanels: function() {
 		return this.$.panels.getPanels();
@@ -83,5 +68,35 @@ enyo.kind({
 			panel = null;
 		}
 		return panel || (pn || (pn = {}), pn.name = panelName, pn.kind = kind, panel = this.addPanel(pn)), panel;
+	},
+	restoreView: function(sender, event) {
+		var that = this,
+			urn = event.urn,
+			persist = blanc.Session.getPersistenceManager();
+		// comment: Change to switch if there are more 
+		if (urn.scheme == "page") {
+			persist.getPageById(urn.location, function(pg) {
+				that.showFile(pg.assetId, pg.pageNo);
+			}, function() {})
+		}
+	},
+	viewDetails: function(sender, event) {
+
+	},
+	displayPage: function(sender, event){
+		var pnls = this.getPanels();
+		if(pnls && pnls.length > 0){
+			var pn = pnls[0];
+			if("meetingView" === pn.getName()){
+				pn.displayPage(event.page);
+				return void 0;
+			}
+			pn.destroy();
+		}
+		this.addPanel({
+			name: "meetingView",
+			kind: "blanc.MeetingView",
+			page: event.page
+		})
 	}
 })

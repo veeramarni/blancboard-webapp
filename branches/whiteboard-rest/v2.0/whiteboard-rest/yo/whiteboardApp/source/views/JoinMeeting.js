@@ -9,7 +9,7 @@ enyo.kind({
 	components: [{
 		classes: "row",
 		components: [{
-			name: "title",
+			name: "subTitle",
 			tag: "h1",
 			allowHtml: true,
 			content: $L("Join Meeting"),
@@ -52,9 +52,36 @@ enyo.kind({
 		}]
 	}],
 	rendered: function(){
-
+		this.inherited(arguments);
+		var urlParams = blanc.Session.getUrlParams();
+		urlParams.joinId ? (this.joinId = urlParams.joinId, this.$.subTitle.setContent("Joining a meeting")) : logError("Invalid parameters")
 	},
 	joinClicked: function(){
+		this.$.submitButton.clicked();
+		if(this.$.fields.validate()){
+			var that = this;
+				fields = this.$.fields.getParams();
+			blanc.Session.signinAsGuest(fields.firstName, fields.lastName, function(){
+				blanc.Session.getConferenceManager().joinConference(that.joinId
+					, {
+					firstName: fields.firstName,
+					lastName: fields.lastName,
+					email: fields.email,
+					password: ""
+				}
+				, function(){
+					that.$.submitButton.reset();
+					that.doSignin()
+				}, function(){
+					that.$.submitButton.reset();
+					that.doErrorAlert({
+						message: $L("We could not connect you to the conference either due to network issue or conference is not valid. Please contact with your Conference Organizer")
+					})
+				})
+			}, function(){})
+		} else 
+			this.$.submitButton.reset();
+
 
 	}, 
 	googleSigninClicked: function(){

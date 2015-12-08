@@ -79,7 +79,7 @@ enyo.kind({
 	updateSelection: function() {
 		var sel = this.$.list.getSelection().getSelected(),
 			k = Object.keys(sel).length > 0,
-			currentObj = blanc.Session.getCurrentSessionDetails();
+			currentObj = blanc.Session.getCurrentUrn();
 		for (var i = 0, curdocId = -1; i < this.files.length; i++) {
 			if (this.files[i].id == currentObj.docId) {
 				curdocId = i;

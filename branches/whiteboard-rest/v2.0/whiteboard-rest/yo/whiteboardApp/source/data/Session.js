@@ -3,13 +3,14 @@ enyo.kind({
     kind: "enyo.Object",
     statics: {
         MAX_FREE_PAGES: 6,
-        SERVERURL: "http://127.0.0.1:8080/",
+        SERVERURL: "http://localhost:8080/",
         APIPATH: "v1.0",
         APP_ID: "353b302c44574f565045687e534e7d6a",
         APP_SECRET: "286924697e615a672a646a493545646c",
         baseSession: null,
         deviceSize: "LARGE",
         conferenceSession: null,
+        urlParams: null,
         premium: false,
         getServerUrl: function() {
             return this.SERVERURL;
@@ -34,6 +35,10 @@ enyo.kind({
         },
         isGuest: function() {
             return !this.isAuthenticated();
+        },
+        isFullScreenSupported: function(){
+            // TO DO
+            return false;
         },
         getDevice: function() {
             return new bjse.api.devices.Device({
@@ -84,15 +89,27 @@ enyo.kind({
                     that.setUserId(user.id);
                     success(user)
                 };
-            this.getRuntime().connectAsGuest(this.APP_ID, this.APP_SECRET, this.getDevice(), function() {
+            this.getRuntime().connectAsGuest(this.getDevice(), this.APP_ID, this.APP_SECRET, function(session) {
                 var user = new bjse.api.users.User({
-                    id: '',
+                    id: session.device.id,
                     firstName: firstName,
                     lastName: lastName,
-                    displayName: enyo.macroize("${firstName} {$lastName}", firstName, lastName).trim()
+                    displayName: enyo.macroize("{$firstName} {$lastName}", {
+                        firstName: firstName,
+                        lastName: lastName
+                    }).trim()
                 });
-                that.user = user;
+                session.user = user;
+                that.baseSession = session;
                 that.premium = false;
+                //upload to the database
+                var persist = blanc.Session.getPersistenceManager();
+                persist.getUserById(user.id, function() {
+                    persist.updateUser(user, complete, error)
+                }, function() {
+                    //if user don't exist it will execute below code
+                    persist.storeUser(user, complete, error)
+                })
 
             }, error)
         },
@@ -101,8 +118,10 @@ enyo.kind({
                 error();
                 return void 0;
             }
+            var that = this;
             this.getRuntime().refresh(this.getUserId(), this.APP_ID, this.APP_SECRET, this.getDevice(), function(session) {
                 var persist = blanc.Session.getPersistenceManager();
+                that.baseSession = session;
                 persist.updateUser(session.user, function() {
                     blanc.Session.getSyncManager().synchronize(function() {});
                     success(session.user);
@@ -132,20 +151,20 @@ enyo.kind({
         register: function(params, success, error) {
             this.getRuntime().register(params, this.APP_ID, this.APP_SECRET, success, error);
         },
-        login: function(params, success, error){
+        login: function(params, success, error) {
             this.getRuntime().login(params, this.APP_ID, this.APP_SECRET, success, error);
         },
         getDeviceId: function() {
             var e = localStorage.getItem("blanc_deviceId");
             return e || (e = bjse.util.randomUUID(), localStorage.setItem("blanc_deviceId", e)), e
         },
-        setConference: function(conference) {
+        setConferenceSession: function(conference) {
             this.conferenceSession = conference;
         },
         isConferenceActive: function() {
             return this.conferenceSession != null;
         },
-        getConference: function() {
+        getConferenceSession: function() {
             return this.conferenceSession;
         },
         getConferenceManager: function() {
@@ -155,23 +174,35 @@ enyo.kind({
             enyo.platform.ios ? "iOS Safari" : enyo.platform.androidChrome ? "Android Chrome" : enyo.platform.safari ? "Safari" : enyo.platform.android ? "Android" : enyo.platform.chrome ? "Chrome" : enyo.platform.anroidFirefox ? "Android Firefox" : enyo.platform.firefox ? "Firefox" : enyo.platform.ie ? "Windows IE" : "Webapp"
 
         },
+        getUrlParams: function() {
+            return null == this.urlParams && (this.urlParams = bjse.util.getUrlParams()), this.urlParams
+        },
+        getSavedJoinId: function() {
+            return localStorage.getItem("blanc_joinId");
+        },
+        unsetJoinId: function() {
+            localStorage.removeItem("blanc_joinId");
+        },
+        setJoinId: function(joinId) {
+            localStorage.setItem("blanc_joinId", joinId);
+        },
         getUserId: function() {
             return localStorage.getItem("blanc_userId");
         },
         setUserId: function(e) {
             localStorage.setItem("blanc_userId", e);
         },
-        setCurrentSessionDetails: function(session) {
-            var ses = this.getCurrentSessionDetails();
-            ses = ses || {};
-            session = bjse.util.extend(ses, session);
-            localStorage.setItem("current_session", JSON.stringify(session));
+        setCurrentUrn: function(urn) {
+            localStorage.setItem("current_URN", urn);
+        },
+        unsetCurrentUrn: function() {
+            localStorage.removeItem("current_URN");
         },
         clearUserData: function() {
             localStorage.removeItem("blanc_userId");
         },
-        getCurrentSessionDetails: function() {
-            return JSON.parse(localStorage.getItem("current_session"));
+        getCurrentUrn: function() {
+            return bjse.api.URN.parse(localStorage.getItem("current_URN"));
         },
         getDeviceSize: function() {
             return this.deviceSize;

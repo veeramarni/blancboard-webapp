@@ -6,7 +6,7 @@ enyo.kind({
 		this.setOrientation(orientation);
 		enyo.forEach(this.getComponents(), function(e){
 			if(e.kind === "blanc.ButtonGroup"){
-				e.destory();
+				e.destroy();
 			}
 		})
 	},

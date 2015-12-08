@@ -1,17 +1,17 @@
 bjse.api.Ajax = (function() {
 	var _endError = function(jqXHR, ajaxOptions, thrownError) {
-		if(jqXHR.status != 200 && jqXHR.readyState != 4){
-						if (jqXHR.status === 0) {
-				return new bjse.api.errors.error({
-					applicationMessage: "Check your network",
-					errorHeader: "Network error"
-				});
+			if (jqXHR.status != 200 && jqXHR.readyState != 4) {
+				if (jqXHR.status === 0) {
+					return new bjse.api.errors.error({
+						applicationMessage: "Check your network",
+						errorHeader: "Network error"
+					});
+				} else {
+					return jqXHR.responseJSON ? jqXHR.responseJSON : logError("Can't find the root cause of the http issue");
+				}
 			} else {
-				return jqXHR.responseJSON ? jqXHR.responseJSON : logError("Can't find the root cause of the http issue");
+				logError("Http status is 200 but it was executing in the error block!");
 			}
-		} else {
-			logError("Http status is 200 but it was executing in the error block!");
-		}
 
 		},
 		_post = function(url, data, success, error, headers) {
@@ -94,16 +94,33 @@ bjse.api.Ajax = (function() {
 		},
 		login: function(url, data, success, error, headers) {
 			// spring requestparam cannot read data from body at the endpoint so temporarily send within url
-			_post(url + "?" + $.param(data), $.param(data), function(response) {
+			// has to be POST only
+			_post(url + "?" + $.param(data), "", function(response) {
 				bjse.api.Cookie.set('authToken', response.access_token);
 				success(response);
 			}, error, headers)
+		},
+		clientAccess: function(url, success, error, headers) {
+			var url = bjse.util.format("{$apiurl}/../oauth/token", {
+					apiurl: this.serverUrl
+				}),
+				headers = {
+					'Authorization': 'Basic ' + bjse.api.Runtime.getApplicationToken(appid, secret)
+				},
+				request = {
+					"username": params.emailAddress,
+					"password": params.password,
+					"grant_type": "password"
+				}
+			bjse.api.Ajax.login(url, request, function(response) {
+				success();
+			}, error, headers);
 		},
 		img: function(url, success, error, responseType) {
 			var xhr = new XMLHttpRequest();
 			try {
 				xhr.open("GET", url);
-				xhr.responseType =  responseType || "blob";
+				xhr.responseType = responseType || "blob";
 				xhr.onerror = function() {
 					error && error("Network error")
 				};
@@ -176,6 +193,17 @@ bjse.api.HttpClient.prototype.delAuth = function(url, data, success, error) {
 			'Authorization': 'Bearer ' + authorization
 		};
 	bjse.api.Ajax.del(url, data, success, error, headers);
+};
+bjse.api.HttpClient.prototype.getHeader = function() {
+	var authorization = bjse.api.Cookie.get('authToken'),
+		headers = {
+			'Authorization': 'Bearer ' + authorization
+		};
+	if (!authorization) {
+		headers = {
+			'Authorization': 'Basic ' + bjse.api.Runtime.getApplicationToken(this.appid, this.secret)
+		}
+	}
 };
 // bjse.api.HttpClient.prototype.postClientAuth = function(url, data, success, error){
 // 	var headers = {

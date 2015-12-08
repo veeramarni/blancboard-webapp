@@ -5,11 +5,11 @@ bjse.api.Exception = function(code, message) {
 bjse.api.Runtime = function(serverUrl) {
 	this.serverUrl = serverUrl;
 };
-bjse.api.Runtime.prototype.connect = function(username, appid, secret, device, success, error) {
-	var session = new bjse.api.Session(this, device, appid, secret, username);
-	session.getUserDirectory().getUser(username, function(user) {
+bjse.api.Runtime.prototype.connect = function(email, appid, secret, device, success, error) {
+	var session = new bjse.api.Session(this, device, appid, secret, email);
+	session.getUserDirectory().getUser(email, function(user) {
 		session.user = user;
-		session.username = user.id;
+		session.username = user.publicId;
 		session.getDeviceManager().registerDevice(device, function(result) {
 			session.device = result;
 			session.connected = true;
@@ -21,7 +21,7 @@ bjse.api.Runtime.prototype.refresh = function(userid, appid, secret, device, suc
 	var session = new bjse.api.Session(this, device, appid, secret, userid);
 	session.getUserDirectory().getUser(userid, function(user) {
 		session.user = user;
-		session.username = user.id;
+		session.username = user.publicId;
 		success(session);
 	}, error);
 };
@@ -54,7 +54,7 @@ bjse.api.Runtime.prototype.login = function(params, appid, secret, success, erro
 	}, error, headers);
 };
 bjse.api.Runtime.prototype.connectAsGuest = function(device, appId, secret, success) {
-	var session = new mc.api.Session(this, device, appId, secret);
+	var session = new bjse.api.Session(this, device, appId, secret);
 	success(session);
 };
 bjse.api.Runtime.getApplicationToken = function(appkey, appsecret) {

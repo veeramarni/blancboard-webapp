@@ -4,7 +4,7 @@ enyo.kind({
 	events: {
 		onSupportRequested: "",
 		onSignoutClicked: "",
-		onSettingSaved: "",
+		onSettingsSaved: "",
 		onErrorAlert: "",
 		onManageAccountClicked: ""
 	},
@@ -16,7 +16,7 @@ enyo.kind({
 			classes: "toolbar-title",
 			tag: "span",
 			content: $L("Settings")
-		},{
+		}, {
 			components: [{
 				name: "saveButton",
 				kind: "blanc.Button",
@@ -25,7 +25,7 @@ enyo.kind({
 				ontap: "saveClicked"
 			}]
 		}]
-	},{
+	}, {
 		kind: "enyo.Scroller",
 		touch: true,
 		fit: true,
@@ -36,7 +36,7 @@ enyo.kind({
 			components: [{
 				name: "username",
 				kind: "blanc.InputGroup",
-				type: "roomid",
+				type: "roomname",
 				placeholder: $L("Enter username"),
 				label: $L("Room ID"),
 				onkeydown: "onEnter"
@@ -66,7 +66,7 @@ enyo.kind({
 				}]
 			}]
 		}]
-			
+
 	}, {
 		name: "toolbar",
 		kind: "blanc.Toolbar",
@@ -89,49 +89,51 @@ enyo.kind({
 			}]
 		}]
 	}],
-	init: function(){
+	init: function() {
 		this.$.username.reset();
 		this.$.email.reset();
 		this.$.name.reset();
 		this.$.saveButton.reset();
 		var that = this;
-		blanc.Session.getUserInfo(function(user){
+		blanc.Session.getUserInfo(function(user) {
 			that.userId = user.id;
-			that.$.username.setValue(user.username);
+			that.$.username.setValue(user.publicId);
 			that.$.email.setValue(user.emailAddress);
 			that.$.name.setValue(user.firstName + " " + user.lastName);
 			that.$.manageAccountButton.setShowing(user.admin);
-		}, function(e){
+		}, function(e) {
 			logError(e);
 		})
 	},
-	saveClicked: function(){
-		if(this.$.fields.validate()){
+	saveClicked: function() {
+		if (this.$.fields.validate()) {
 			var names = blanc.util.splitName(this.$.name.getValue()),
 				user = {
 					firstName: names[0],
 					lastName: names[1],
 					emailAddress: this.$.email.getValue(),
-					username: this.$.username.getValue()
+					publicId: this.$.username.getValue()
 				},
-				n = this;
-			blanc.Session.getUserDirectory().updateUser(this.userId, user, function(){
-
-			}, function(e){
-				n.$.saveButton.reset();
-				n.doErrorAlert(e);
+				that = this;
+			blanc.Session.getUserDirectory().updateUser(this.userId, user, function(updatedUser) {
+				blanc.Session.getPersistenceManager().updateUser(updatedUser, function() {
+					that.doSettingsSaved();
+				})
+			}, function(e) {
+				that.$.saveButton.reset();
+				that.doErrorAlert(e);
 			})
 		} else {
 			this.$.saveButton.reset();
 		}
 		return true;
 	},
-	onEnter: function(e, t){
-		if(t.keyCode === 13){
+	onEnter: function(sender, event) {
+		if (event.keyCode === 13) {
 			this.saveClicked();
 			return true;
-		} else {
-			return false;
 		}
+		return false;
+
 	}
 })

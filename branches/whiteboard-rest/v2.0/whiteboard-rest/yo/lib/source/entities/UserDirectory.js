@@ -38,12 +38,9 @@ bjse.api.users.UserDirectory.prototype.updateUser = function(userId, updatedUser
 		userId: userId
 		}),
 		that = this;
-	this.session.getHttpClient().postAuth(url,updatedUser, function(response){
+	this.session.getHttpClient().putAuth(url,updatedUser, function(response){
 		var user = new bjse.api.users.User(response);
-		 if(that.session.user.id === user.id){
-		 	that.session.user = user;
-		 	that.session.username = user.email;
-		 }
+		 	that.session.username = user.publicId;
 		 success(user);
 	}, error);
 };

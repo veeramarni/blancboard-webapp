@@ -7,12 +7,14 @@ enyo.kind({
     },
     init: function(mm){
         this.inherited(arguments);
+         var isConfActive = blanc.Session.isConferenceActive(),
+            isOrganizer = isConfActive ? blanc.Session.getConferenceSession().isOrganizer() : false;
         this.leading = this.createComponent({
             name: "leading",
             kind: "blanc.ButtonGroup",
             classes: "menu leading",
             menuModel: mm,
-            buttons: ["pages", "fullscreen"]
+            buttons: isConfActive ? isOrganizer ? ["pages", "fullscreen"] : ["fullscreen"] : ["pages", "fullscreen"]
         },{
             owner: this
         });

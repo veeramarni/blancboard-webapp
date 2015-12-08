@@ -205,6 +205,19 @@ enyo.kind({
 			error && error(event.target.error);
 		};
 	},
+	getPageById: function(pageId, success, error){
+		var trans = this.database.transaction(["pages"], "readonly"),
+			objstore = trans.objectStore("pages"),
+			res = objstore.get(pageId),
+			that = this;
+		res.onsuccess = function(event) {
+			var data = event.target.result;
+			data ? success(that.record2page(data)) : (error && error("pageId: " + pageId + " not found."));
+		}
+		res.onerror = function(event) {
+			error && error(res.error);
+		}
+	},
 	updatePage: function(page, success, error){
 		return this.storePage(page, success, error);
 	},
@@ -443,11 +456,11 @@ enyo.kind({
 				});
 			}
 		}, function() {
-			if (that.elemArray.length == 0) {
+			if (elemArray.length == 0) {
 				success && success();
 			}
 		}, function() {
-			if (that.elemArray.length == 0) {
+			if (elemArray.length == 0) {
 				error && error();
 			}
 		});
