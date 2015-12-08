@@ -5,6 +5,7 @@ enyo.kind({
 		onFileOpen: "openFile",
 		onFileSelected: "fileSelected",
 		onPageSelected: "pageSelected",
+		onSettingsSaved: "closeMenu"
 	},
 	components: [{
 		style: "width: 100%; height: 100%; position: relative;",

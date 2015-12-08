@@ -34,7 +34,16 @@ enyo.kind({
 	rendered: function(){
 		this.inherited(arguments);
 		this.determineDeviceSize();
-		if(blanc.Session.isAuthenticated()){
+		var urlParams = blanc.Session.getUrlParams();
+		if(urlParams.invitationId || urlParams.joinId || urlParams.signup){
+			if(blanc.Session.isAuthenticated()){
+				var that = this;
+				blanc.Session.signout(function(){
+					that.processSignout();
+				}, function(){})
+			} else 
+				this.processSignout();
+		}else if(blanc.Session.isAuthenticated()){
 			var that = this;
 			blanc.Session.refreshSession(function(){
 				that.waterfallDown("onSessionRefreshed",{})

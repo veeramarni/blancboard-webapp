@@ -47,7 +47,16 @@ enyo.kind({
 	}],
 	create: function() {
 		this.inherited(arguments);
-		this.showSignin();
+		var urlParam = blanc.Session.getUrlParams();
+		if (urlParam.invid || urlParam.signup) {
+			this.showSignup();
+		} else if (urlParam.roomName || urlParam.joinId) {
+			this.showJoin();
+		} else if (urlParam.token) {
+			this.showResetPassword();
+		} else {
+			this.showSignin();
+		}
 	},
 	showSignin: function() {
 		this.$.signin.reset();

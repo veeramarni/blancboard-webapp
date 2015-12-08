@@ -1,6 +1,11 @@
 enyo.kind({
 	name: "blanc.MeetingPageView",
-	kind: "blanc.Page",
+	
+	// variables
+	page: null,
+	events: {
+		onPageDisplayed: ""
+	},
 	components: [{}]
 
 })

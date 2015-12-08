@@ -3,8 +3,8 @@ enyo.kind({
 	kind: "enyo.Control",
 	handlers: {
 		onWindowRotated: "windowRotated",
-		onMeetingStarted: "refresh",
-		onMeetingEnded: "refresh",
+		onConferenceStarted: "refresh",
+		onConferenceEnded: "refresh",
 		onCanShare: "refresh"
 	},
 	events: {

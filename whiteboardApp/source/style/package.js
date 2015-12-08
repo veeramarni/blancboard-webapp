@@ -5,5 +5,7 @@ enyo.depends(
 	 <!-- Load Dropzone CSS -->
 	"../../../bower_components/dropzone/dist/basic.css",
 	"../../../bower_components/dropzone/dist/dropzone.css",
+	<!-- Blackbird -->
+	"../../../bower_components/blackbirdjs/blackbird.css",
 	"buttons.css"
 );

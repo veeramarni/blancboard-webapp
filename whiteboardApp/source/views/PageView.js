@@ -9,7 +9,7 @@ enyo.kind({
 	docId: null,
 
 	handlers: {
-		onMeetingStarted: "meetingStarted"
+		onConferenceStarted: "conferenceStarted",
 	},
 	didAppear: function() {
 		this.$.board && this.$.board.didAppear();
@@ -17,7 +17,7 @@ enyo.kind({
 	didDisappear: function() {
 		this.$.board && this.$.board.didDisappear();
 	},
-	meetingStarted: function(sender, event) {
-		event.meetingSession.isPresenter() && (this.$.board ? this.$.board.saveElements(enyo.bind(this, "raisePageRendered")) : this.raisePageRendered());
+	conferenceStarted: function(sender, event) {
+		event.conferenceSession.isPresenter() && (this.$.board ? this.$.board.saveElements(enyo.bind(this, "raisePageRendered")) : this.raisePageRendered());
 	}
 })

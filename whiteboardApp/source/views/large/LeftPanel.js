@@ -29,7 +29,7 @@ enyo.kind({
 			kind: "blanc.Meetings"
 		},{
 			name: "people",
-		//	kind: "blanc.Attendees"
+			kind: "blanc.Participants"
 		},{
 			name: "files",
 			kind: "blanc.FileList"
@@ -59,7 +59,7 @@ enyo.kind({
 	},
 	finishedAnimating: function(){
 		if(this.completion){
-			this.completion();
+			typeof this.completion === "function" && this.completion();
 			this.completion = null;
 		}
 		var e = this.$.panels.getActive();
