@@ -15,7 +15,7 @@ Running `grunt test` will run the unit tests with karma.
 
 Initial Setup
 ---------
-'cd blancboard-webapp'
+`cd blancboard-webapp`
 
  `npm install`
  
