@@ -12,3 +12,14 @@ Run `grunt` for building and `grunt serve` for preview.
 Running `grunt test` will run the unit tests with karma.
 
 
+
+Initial Setup
+---------
+install grun
+npm install -g grunt
+
+install grunt modules
+npm install grunt --save-dev
+
+
+
