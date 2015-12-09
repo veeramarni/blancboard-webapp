@@ -14,7 +14,6 @@ enyo.depends(
 	"$lib/../atmosphere-javascript/modules/javascript/src/main/webapp/javascript/atmosphere.js",
 	"$lib/../dropzone/dist/dropzone.js",
 	"$lib/../layout",
-	"$lib/../enyo-animated",
 	"$lib/../onyx",
 	"$lib/../../lib",
 	"style",
