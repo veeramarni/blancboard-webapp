@@ -15,11 +15,8 @@ Running `grunt test` will run the unit tests with karma.
 
 Initial Setup
 ---------
-install grun
-npm install -g grunt
+ npm install
 
-install grunt modules
-npm install grunt --save-dev
 
 
 
