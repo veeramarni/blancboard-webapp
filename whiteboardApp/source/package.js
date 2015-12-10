@@ -21,5 +21,6 @@ enyo.depends(
 	"views",
 	/** remove test in production **/
 	"Test.js",
+  "enyoConfig.js",
 	"app.js"
 )

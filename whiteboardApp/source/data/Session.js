@@ -3,23 +3,19 @@ enyo.kind({
     kind: "enyo.Object",
     statics: {
         MAX_FREE_PAGES: 6,
-        SERVERURL: "http://localhost:8080/",
-        APIPATH: "v1.0",
-        APP_ID: "353b302c44574f565045687e534e7d6a",
-        APP_SECRET: "286924697e615a672a646a493545646c",
         baseSession: null,
         deviceSize: "LARGE",
         conferenceSession: null,
         urlParams: null,
         premium: false,
         getServerUrl: function() {
-            return this.SERVERURL;
+            return AppConfig.SERVER_URL;
         },
         getBaseSession: function() {
-            return this.baseSession || (this.baseSession = new bjse.api.Session(this.getRuntime(), this.getDevice(), this.APP_ID, this.APP_SECRET)), this.baseSession;
+            return this.baseSession || (this.baseSession = new bjse.api.Session(this.getRuntime(), this.getDevice(), AppConfig.APP_ID, AppConfig.APP_SECRET)), this.baseSession;
         },
         getRuntime: function() {
-            return this.runtime || (this.runtime = new bjse.api.Runtime(this.SERVERURL + this.APIPATH)), this.runtime;
+            return this.runtime || (this.runtime = new bjse.api.Runtime(AppConfig.SERVER_URL + AppConfig.API_PATH)), this.runtime;
         },
         getPersistenceManager: function() {
             return null == this.persistenceManager && (this.persistenceManager = enyo.platform.ios || enyo.platform.safari || enyo.platform.androidChrome ? new blanc.WebSQLManager : window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB ? new blanc.IndexedDBManager : new blanc.WebSQLManager), this.persistenceManager
@@ -69,7 +65,7 @@ enyo.kind({
                     blanc.Session.getSyncManager().synchronize(function() {});
                     success(user);
                 };
-            this.getRuntime().connect(email, this.APP_ID, this.APP_SECRET, this.getDevice(), function(session) {
+            this.getRuntime().connect(email, AppConfig.APP_ID, AppConfig.APP_SECRET, this.getDevice(), function(session) {
                 that.baseSession = session;
                 that.premium = session.user.accountType == bjse.api.users.AccountType.PREMIUM;
                 //that.saveCredentials(session.user.id);
@@ -89,7 +85,7 @@ enyo.kind({
                     that.setUserId(user.id);
                     success(user)
                 };
-            this.getRuntime().connectAsGuest(this.getDevice(), this.APP_ID, this.APP_SECRET, function(session) {
+            this.getRuntime().connectAsGuest(this.getDevice(), AppConfig.APP_ID, AppConfig.APP_SECRET, function(session) {
                 var user = new bjse.api.users.User({
                     id: session.device.id,
                     firstName: firstName,
@@ -119,7 +115,7 @@ enyo.kind({
                 return void 0;
             }
             var that = this;
-            this.getRuntime().refresh(this.getUserId(), this.APP_ID, this.APP_SECRET, this.getDevice(), function(session) {
+            this.getRuntime().refresh(this.getUserId(), AppConfig.APP_ID, AppConfig.APP_SECRET, this.getDevice(), function(session) {
                 var persist = blanc.Session.getPersistenceManager();
                 that.baseSession = session;
                 persist.updateUser(session.user, function() {
@@ -149,10 +145,10 @@ enyo.kind({
             this.getBaseSession() ? this.getBaseSession().disconnect(complete, complete) : complete();
         },
         register: function(params, success, error) {
-            this.getRuntime().register(params, this.APP_ID, this.APP_SECRET, success, error);
+            this.getRuntime().register(params, AppConfig.APP_ID, AppConfig.APP_SECRET, success, error);
         },
         login: function(params, success, error) {
-            this.getRuntime().login(params, this.APP_ID, this.APP_SECRET, success, error);
+            this.getRuntime().login(params, AppConfig.APP_ID, AppConfig.APP_SECRET, success, error);
         },
         getDeviceId: function() {
             var e = localStorage.getItem("blanc_deviceId");

@@ -63,6 +63,10 @@
           files: ['./config/config.js', './config/environments/development.json'],
           tasks: ['replace:development']
         },
+        configWb: {
+          files: ['./config/enyoConfig.js', './config/environments/development.json'],
+          tasks: ['replace:developmentWb']
+        },
         livereload: {
           options: {
             livereload: '<%= connect.options.livereload %>'
@@ -97,7 +101,7 @@
         options: {
           port: 9000,
           // Change this to '0.0.0.0' to access the server from outside.
-          hostname: '0.0.0.0',
+          hostname: 'localhost',
           livereload: 35729
         },
         livereload: {
@@ -449,6 +453,19 @@
             dest: '<%= yeoman.app %>/scripts/services/'
           }]
         },
+        developmentWb: {
+          options: {
+            patterns: [{
+              json: grunt.file.readJSON('./config/environments/development.json')
+            }]
+          },
+          files: [{
+            expand: true,
+            flatten: true,
+            src: ['./config/enyoConfig.js'],
+            dest: '<%= yeoman.whiteboard %>/source/'
+          }]
+        },
         staging: {
           options: {
             patterns: [{
@@ -462,6 +479,19 @@
             dest: '<%= yeoman.app %>/scripts/services/'
           }]
         },
+        stagingWb: {
+          options: {
+            patterns: [{
+              json: grunt.file.readJSON('./config/environments/staging.json')
+            }]
+          },
+          files: [{
+            expand: true,
+            flatten: true,
+            src: ['./config/enyoConfig.js'],
+            dest: '<%= yeoman.whiteboard %>/source/'
+          }]
+        },
         production: {
           options: {
             patterns: [{
@@ -473,6 +503,19 @@
             flatten: true,
             src: ['./config/config.js'],
             dest: '<%= yeoman.app %>/scripts/services/'
+          }]
+        },
+        productionWb: {
+          options: {
+            patterns: [{
+              json: grunt.file.readJSON('./config/environments/production.json')
+            }]
+          },
+          files: [{
+            expand: true,
+            flatten: true,
+            src: ['./config/enyoConfig.js'],
+            dest: '<%= yeoman.whiteboard %>/source/'
           }]
         }
       },
@@ -577,7 +620,7 @@
       }
       grunt.task.run([
         'clean:server',
-        //'whiteboard:deploy',
+        'replace:developmentWb',
         'connect:livereloadWb',
         'watch'
       ]);
@@ -585,6 +628,7 @@
 
     grunt.registerTask('wbdeploy', [
       'clean:server',
+      'replace:developmentWb',
       'whiteboard:deploy',
       'connect:livereloadWb',
       'watch'
@@ -609,7 +653,7 @@
       'ngAnnotate',
       'copy:dist',
       //commenting cdnify as it is not workig properly
-      //'cdnify', 
+      //'cdnify',
       'cssmin',
       'uglify',
       'filerev',
