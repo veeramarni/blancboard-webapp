@@ -22,7 +22,13 @@ Initial Setup
  
  `bower install`
 
+Configuration
+---------
+Any configurations goes under
 
+`config/development.json` for development environment.
+`config/staging.json` for staging environment.
+`config/production.json` for production environment.
 
 Github shortcut commands
 ----
