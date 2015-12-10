@@ -26,11 +26,11 @@ Configuration
 ---------
 Any configurations goes under
 
-`config/development.json` for development environment
+`config/environments/development.json` for development environment
 
-`config/staging.json` for staging environment
+`config/environments/staging.json` for staging environment
 
-`config/production.json` for production environment
+`config/environments/production.json` for production environment
 
 
 Github shortcut commands
