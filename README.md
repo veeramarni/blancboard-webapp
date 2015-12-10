@@ -33,6 +33,9 @@ Any configurations goes under
 `config/environments/production.json` for production environment
 
 
+Enyo Code is under whiteboardApp folder
+------
+
 Github shortcut commands
 ----
 To checkout git, make sure to install git first and then do
