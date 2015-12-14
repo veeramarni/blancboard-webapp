@@ -50,7 +50,7 @@ To add changes that you want to commit
 
 `git status`  <-- gives you all the changes 
 
-`git add <files that need to be committed> 
+`git add <files that need to be committed>` 
 
 `git commit <changed file you want to commit>`
 
