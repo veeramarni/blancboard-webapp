@@ -50,6 +50,8 @@ To add changes that you want to commit
 
 `git status`  <-- gives you all the changes 
 
+`git add <files that need to be committed> 
+
 `git commit <changed file you want to commit>`
 
 To push your commit to the git repository as your commits will not be pushed until you run the following command
