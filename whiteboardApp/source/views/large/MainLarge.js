@@ -23,9 +23,13 @@ enyo.kind({
 			name: "FittableRows",
 			classes: "enyo-fit",
 			name: "container",
-			components: [{
+			components: [/*{
 				name: "content",
 				kind: "blanc.Content",
+				fit: true
+			}*/{
+				name: "content",
+				kind: "blanc.LargeMettingDashboard",
 				fit: true
 			}]
 		}]

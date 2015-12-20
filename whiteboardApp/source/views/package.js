@@ -99,5 +99,6 @@ enyo.depends(
 "large/UploadProgressItem.js",
 "large/UploadProgressPanel.js",
 "large/AppLarge.js",
-"large/WelcomeDialog.js"
+"large/WelcomeDialog.js",
+"large/LargeMettingDashboard.js"
 );

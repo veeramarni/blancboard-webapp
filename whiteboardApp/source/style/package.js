@@ -7,5 +7,6 @@ enyo.depends(
 	"../../../bower_components/dropzone/dist/dropzone.css",
 	<!-- Blackbird -->
 	"../../../bower_components/blackbirdjs/blackbird.css",
-	"buttons.css"
+	"buttons.css",
+	"LargeMettingDashboard.less"
 );

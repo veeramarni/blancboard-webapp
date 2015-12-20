@@ -17,6 +17,7 @@ enyo.depends(
 	"$lib/../onyx",
 	"$lib/../../lib",
 	"style",
+	"external",
 	"data",
 	"views",
 	/** remove test in production **/
